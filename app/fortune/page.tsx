@@ -5,26 +5,49 @@ import Link from "next/link";
 
 const BLOOD_TYPES = ["A", "B", "O", "AB"];
 const MAX_DAILY = 3;
+const SHARE_BONUS = 2;
 const STORAGE_KEY = "uranai_count";
+const SHARE_KEY = "uranai_shared";
 
-function getDailyCount(): number {
+function getDailyData(): { count: number; bonus: number } {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return 0;
-    const { date, count } = JSON.parse(stored);
-    if (date !== new Date().toDateString()) return 0;
-    return count;
+    if (!stored) return { count: 0, bonus: 0 };
+    const { date, count, bonus = 0 } = JSON.parse(stored);
+    if (date !== new Date().toDateString()) return { count: 0, bonus: 0 };
+    return { count, bonus };
   } catch {
-    return 0;
+    return { count: 0, bonus: 0 };
   }
 }
 
+function getDailyCount(): number {
+  return getDailyData().count;
+}
+
+function getMaxDaily(): number {
+  return MAX_DAILY + getDailyData().bonus;
+}
+
 function incrementDailyCount() {
-  const count = getDailyCount() + 1;
+  const { count, bonus } = getDailyData();
   localStorage.setItem(
     STORAGE_KEY,
-    JSON.stringify({ date: new Date().toDateString(), count })
+    JSON.stringify({ date: new Date().toDateString(), count: count + 1, bonus })
   );
+}
+
+function addShareBonus() {
+  const today = new Date().toDateString();
+  const shared = localStorage.getItem(SHARE_KEY);
+  if (shared === today) return false; // 1日1回まで
+  const { count, bonus } = getDailyData();
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ date: today, count, bonus: bonus + SHARE_BONUS })
+  );
+  localStorage.setItem(SHARE_KEY, today);
+  return true;
 }
 
 type FortuneResult = {
@@ -69,14 +92,16 @@ export default function FortunePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FortuneResult | null>(null);
   const [error, setError] = useState("");
+  const [shareBonusGiven, setShareBonusGiven] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
     const count = getDailyCount();
-    if (count >= MAX_DAILY) {
-      setError("本日の無料鑑定（3回）に達しました。また明日お越しください。");
+    const max = getMaxDaily();
+    if (count >= max) {
+      setError(`本日の鑑定（${max}回）に達しました。また明日お越しください。`);
       return;
     }
 
@@ -191,12 +216,25 @@ export default function FortunePage() {
 
               {/* シェア */}
               <div className="space-y-3">
-                <p className="text-[10px] tracking-[0.3em] text-[#d4a84c]/50 uppercase text-center">Share</p>
+                <div className="text-center space-y-1">
+                  <p className="text-[10px] tracking-[0.3em] text-[#d4a84c]/50 uppercase">Share</p>
+                  {!shareBonusGiven && (
+                    <p className="text-[10px] text-[#d4a84c]/70 tracking-wider">
+                      シェアすると本日の鑑定回数が +{SHARE_BONUS}回 増えます
+                    </p>
+                  )}
+                  {shareBonusGiven && (
+                    <p className="text-[10px] text-[#d4a84c] tracking-wider">
+                      ✨ +{SHARE_BONUS}回プレゼントしました！
+                    </p>
+                  )}
+                </div>
                 <div className="flex gap-3">
                   <a
                     href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => { if (addShareBonus()) setShareBonusGiven(true); }}
                     className="flex-1 py-3 text-sm tracking-wider text-center transition-all"
                     style={{
                       background: "rgba(255,255,255,0.04)",
@@ -209,6 +247,7 @@ export default function FortunePage() {
                     href={`https://line.me/R/share?text=${encodeURIComponent(shareText)}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => { if (addShareBonus()) setShareBonusGiven(true); }}
                     className="flex-1 py-3 text-sm tracking-wider text-center transition-all"
                     style={{
                       background: "rgba(0,195,0,0.08)",
