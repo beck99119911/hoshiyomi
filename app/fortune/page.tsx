@@ -127,7 +127,8 @@ function PalmScanner({
   onScan: (image: string) => void;
   loading: boolean;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -159,37 +160,55 @@ function PalmScanner({
     reader.readAsDataURL(file);
   }
 
+  if (loading) {
+    return (
+      <div
+        className="w-full py-4 text-sm tracking-wider text-center"
+        style={{ border: "1px solid rgba(212,168,76,0.2)", color: "rgba(232,208,138,0.6)" }}
+      >
+        <span className="shimmer inline-block">手相を読み解いています ...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+      <input ref={galleryRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
       <button
-        onClick={() => inputRef.current?.click()}
-        disabled={loading}
-        className="w-full py-4 text-sm tracking-wider transition-all duration-200 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+        onClick={() => cameraRef.current?.click()}
+        className="w-full py-4 text-sm tracking-wider transition-all duration-200 hover:opacity-80"
         style={{
           background: "linear-gradient(135deg, rgba(212,168,76,0.12), rgba(212,168,76,0.05))",
           border: "1px solid rgba(212,168,76,0.45)",
           color: "#e8d08a",
         }}
       >
-        {loading ? (
-          <span className="shimmer inline-block">手相を読み解いています ...</span>
-        ) : (
-          "✋ 手のひらを撮影して鑑定する"
-        )}
+        📷 カメラで撮影して鑑定する
+      </button>
+      <button
+        onClick={() => galleryRef.current?.click()}
+        className="w-full py-3 text-xs tracking-wider transition-all duration-200 hover:opacity-80"
+        style={{
+          background: "rgba(212,168,76,0.03)",
+          border: "1px solid rgba(212,168,76,0.2)",
+          color: "rgba(240,232,216,0.45)",
+        }}
+      >
+        🖼️ アルバムから選択
       </button>
     </div>
   );
 }
 
 export default function FortunePage() {
-  const [birthDate, setBirthDate] = useState("");
+  const [birthYear, setBirthYear] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthDay, setBirthDay] = useState("");
+  const birthDate =
+    birthYear && birthMonth && birthDay
+      ? `${birthYear}-${birthMonth.padStart(2, "0")}-${birthDay.padStart(2, "0")}`
+      : "";
   const [bloodType, setBloodType] = useState("");
   const [concern, setConcern] = useState("");
   const [loading, setLoading] = useState(false);
@@ -541,18 +560,56 @@ export default function FortunePage() {
                   <label className="block text-[10px] tracking-[0.3em] text-[#d4a84c]/60 uppercase mb-3">
                     Birth Date · 生年月日
                   </label>
-                  <input
-                    type="date"
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
-                    required
-                    max={new Date().toISOString().split("T")[0]}
-                    className="w-full px-5 py-4 text-sm text-[#f0e8d8] bg-transparent focus:outline-none"
-                    style={{
-                      background: "rgba(212,168,76,0.04)",
-                      border: "1px solid rgba(212,168,76,0.25)",
-                    }}
-                  />
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      {
+                        value: birthYear,
+                        onChange: setBirthYear,
+                        placeholder: "年",
+                        options: Array.from({ length: 87 }, (_, i) => {
+                          const y = 2010 - i;
+                          return { value: String(y), label: `${y}年` };
+                        }),
+                      },
+                      {
+                        value: birthMonth,
+                        onChange: setBirthMonth,
+                        placeholder: "月",
+                        options: Array.from({ length: 12 }, (_, i) => ({
+                          value: String(i + 1),
+                          label: `${i + 1}月`,
+                        })),
+                      },
+                      {
+                        value: birthDay,
+                        onChange: setBirthDay,
+                        placeholder: "日",
+                        options: Array.from({ length: 31 }, (_, i) => ({
+                          value: String(i + 1),
+                          label: `${i + 1}日`,
+                        })),
+                      },
+                    ].map(({ value, onChange, placeholder, options }) => (
+                      <select
+                        key={placeholder}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        className="w-full px-3 py-4 text-sm focus:outline-none appearance-none text-center"
+                        style={{
+                          background: "rgba(212,168,76,0.04)",
+                          border: "1px solid rgba(212,168,76,0.25)",
+                          color: value ? "#f0e8d8" : "rgba(240,232,216,0.3)",
+                        }}
+                      >
+                        <option value="">{placeholder}</option>
+                        {options.map((o) => (
+                          <option key={o.value} value={o.value} style={{ background: "#0d0e20" }}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    ))}
+                  </div>
                 </div>
 
                 {/* 血液型 */}
