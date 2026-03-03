@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const now = new Date();
-  const today = now.toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "long" });
+  const today = now.toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo", month: "long", day: "numeric", weekday: "long" });
   // 曜日ごとにテーマを変える（0=日〜6=土）
   const THEMES = [
     "今日の総合運と気をつけるべきこと",       // 日
