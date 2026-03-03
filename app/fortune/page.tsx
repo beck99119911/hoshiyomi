@@ -69,6 +69,35 @@ const SCORE_LABELS = [
   { key: "health",  label: "健康運" },
 ];
 
+function CopyButton({ shareUrl, onCopy }: { shareUrl: string; onCopy: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      onCopy();
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard API が使えない場合は無視
+    }
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex-1 py-3 text-sm tracking-wider text-center transition-all duration-200 hover:opacity-80"
+      style={{
+        background: "rgba(212,168,76,0.06)",
+        border: "1px solid rgba(212,168,76,0.2)",
+        color: copied ? "#d4a84c" : "rgba(240,232,216,0.6)",
+      }}
+    >
+      {copied ? "✓ コピー完了" : "🔗 URLをコピー"}
+    </button>
+  );
+}
+
 function ScoreRow({ label, score }: { label: string; score: number }) {
   return (
     <div>
@@ -94,7 +123,7 @@ export default function FortunePage() {
   const [error, setError] = useState("");
   const [shareBonusGiven, setShareBonusGiven] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
 
@@ -124,8 +153,30 @@ export default function FortunePage() {
     }
   }
 
+  // シェアURL（OG画像付き）を構築
+  const shareUrl = result
+    ? (() => {
+        const base =
+          typeof window !== "undefined"
+            ? window.location.origin
+            : "https://hoshiyomi.xyz";
+        const q = new URLSearchParams({
+          zodiac:  result.zodiac,
+          lp:      String(result.lifePathNumber),
+          blood:   bloodType,
+          overall: String(result.scores.overall),
+          love:    String(result.scores.love),
+          work:    String(result.scores.work),
+          money:   String(result.scores.money),
+          health:  String(result.scores.health),
+          quote:   result.quote,
+        });
+        return `${base}/share?${q.toString()}`;
+      })()
+    : "";
+
   const shareText = result
-    ? `🔮 星詠みで今週の運勢を鑑定しました\n${result.zodiac} × ライフパス${result.lifePathNumber}\n\n"${result.quote}"\n\n#星詠み #AI占い`
+    ? `🔮 星詠み AI鑑定【今週の運勢】\n${result.zodiac} × ライフパス${result.lifePathNumber} × ${bloodType}型\n\n総合運 ${"●".repeat(result.scores.overall)}${"○".repeat(5 - result.scores.overall)}\n恋愛運 ${"●".repeat(result.scores.love)}${"○".repeat(5 - result.scores.love)}\n\n"${result.quote}"\n\n#星詠み #AI占い #今週の運勢`
     : "";
 
   return (
@@ -218,37 +269,42 @@ export default function FortunePage() {
               <div className="space-y-3">
                 <div className="text-center space-y-1">
                   <p className="text-[10px] tracking-[0.3em] text-[#d4a84c]/50 uppercase">Share</p>
-                  {!shareBonusGiven && (
+                  {!shareBonusGiven ? (
                     <p className="text-[10px] text-[#d4a84c]/70 tracking-wider">
                       シェアすると本日の鑑定回数が +{SHARE_BONUS}回 増えます
                     </p>
-                  )}
-                  {shareBonusGiven && (
+                  ) : (
                     <p className="text-[10px] text-[#d4a84c] tracking-wider">
                       ✨ +{SHARE_BONUS}回プレゼントしました！
                     </p>
                   )}
                 </div>
+
+                {/* X シェア（メイン） */}
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => { if (addShareBonus()) setShareBonusGiven(true); }}
+                  className="flex items-center justify-center gap-2 w-full py-4 text-sm tracking-widest transition-all duration-200 hover:opacity-80"
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                  }}
+                >
+                  <span>𝕏</span>
+                  <span className="text-[#f0e8d8]">結果をポストする</span>
+                  <span className="text-[10px] text-[#f0e8d8]/40 tracking-wider ml-1">← カード画像付き</span>
+                </a>
+
+                {/* LINE + URLコピー */}
                 <div className="flex gap-3">
                   <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}
+                    href={`https://line.me/R/share?text=${encodeURIComponent(shareText + "\n" + shareUrl)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => { if (addShareBonus()) setShareBonusGiven(true); }}
-                    className="flex-1 py-3 text-sm tracking-wider text-center transition-all"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                    }}
-                  >
-                    𝕏 でシェア
-                  </a>
-                  <a
-                    href={`https://line.me/R/share?text=${encodeURIComponent(shareText)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => { if (addShareBonus()) setShareBonusGiven(true); }}
-                    className="flex-1 py-3 text-sm tracking-wider text-center transition-all"
+                    className="flex-1 py-3 text-sm tracking-wider text-center transition-all duration-200 hover:opacity-80"
                     style={{
                       background: "rgba(0,195,0,0.08)",
                       border: "1px solid rgba(0,195,0,0.2)",
@@ -256,6 +312,7 @@ export default function FortunePage() {
                   >
                     LINE でシェア
                   </a>
+                  <CopyButton shareUrl={shareUrl} onCopy={() => { if (addShareBonus()) setShareBonusGiven(true); }} />
                 </div>
               </div>
 
