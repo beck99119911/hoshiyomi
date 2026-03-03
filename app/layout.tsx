@@ -16,6 +16,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "星詠み - AIによる本格占い鑑定",
   description: "西洋占星術・数秘術・血液型を組み合わせたAI占い。今の悩みを入力するだけで、具体的なアドバイスが届きます。1日3回まで無料。",
+  metadataBase: new URL("https://hoshiyomi.xyz"),
+  openGraph: {
+    title: "星詠み - AIによる本格占い鑑定",
+    description: "西洋占星術・数秘術・血液型を組み合わせたAI占い。1日3回まで無料。",
+    url: "https://hoshiyomi.xyz",
+    siteName: "星詠み",
+    locale: "ja_JP",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "星詠み - AIによる本格占い鑑定",
+    description: "西洋占星術・数秘術・血液型を組み合わせたAI占い。1日3回まで無料。",
+    site: "@hoshiyomi_xyz",
+  },
 };
 
 export default function RootLayout({
