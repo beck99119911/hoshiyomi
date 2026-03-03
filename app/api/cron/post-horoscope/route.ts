@@ -2,6 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { TwitterApi } from "twitter-api-v2";
 
+export const maxDuration = 60;
+
 const ZODIACS = [
   "牡羊座", "牡牛座", "双子座", "蟹座",
   "獅子座", "乙女座", "天秤座", "蠍座",
@@ -28,8 +30,6 @@ export async function GET(req: Request) {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const now = new Date();
   const today = now.toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "long" });
-  const results: { zodiac: string; ok: boolean; error?: string }[] = [];
-
   // 曜日ごとにテーマを変える（0=日〜6=土）
   const THEMES = [
     "今日の総合運と気をつけるべきこと",       // 日
@@ -51,15 +51,17 @@ export async function GET(req: Request) {
     "今日関わると良い人のタイプや出会いのヒント",
   ];
 
-  for (const zodiac of targets) {
-    const format = FORMATS[ZODIACS.indexOf(zodiac) % FORMATS.length];
-    try {
-      const res = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 256,
-        messages: [{
-          role: "user",
-          content: `${today}の${zodiac}について、テーマ「${theme}」でツイートを1件作成してください。
+  // 全星座のツイートテキストを並列生成
+  const generated = await Promise.all(
+    targets.map(async (zodiac) => {
+      const format = FORMATS[ZODIACS.indexOf(zodiac) % FORMATS.length];
+      try {
+        const res = await anthropic.messages.create({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 256,
+          messages: [{
+            role: "user",
+            content: `${today}の${zodiac}について、テーマ「${theme}」でツイートを1件作成してください。
 
 フォーカス：${format}
 
@@ -71,19 +73,30 @@ export async function GET(req: Request) {
 ・絵文字を1〜2個使う
 ・URLは含めない
 ・ツイート本文のみ出力`,
-        }],
-      });
-
-      const text = res.content[0].type === "text" ? res.content[0].text.trim() : null;
-      if (text) {
-        await twitter.v2.tweet(`${text}\n\nhoshiyomi.xyz`);
-        results.push({ zodiac, ok: true });
+          }],
+        });
+        const text = res.content[0].type === "text" ? res.content[0].text.trim() : null;
+        return { zodiac, text };
+      } catch (err) {
+        return { zodiac, text: null, error: String(err) };
       }
+    })
+  );
+
+  // ツイートを順番に投稿（Twitter API負荷分散のため1秒間隔）
+  const results: { zodiac: string; ok: boolean; error?: string }[] = [];
+  for (const { zodiac, text, error } of generated) {
+    if (!text) {
+      results.push({ zodiac, ok: false, error });
+      continue;
+    }
+    try {
+      await twitter.v2.tweet(`${text}\n\nhoshiyomi.xyz`);
+      results.push({ zodiac, ok: true });
     } catch (err) {
       results.push({ zodiac, ok: false, error: String(err) });
     }
-
-    await new Promise((r) => setTimeout(r, 5000));
+    await new Promise((r) => setTimeout(r, 1000));
   }
 
   return NextResponse.json({ date: today, results });
