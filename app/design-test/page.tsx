@@ -36,6 +36,13 @@ const DESIGNS = [
     dot: "#d4a84c",
     tag: "現行ベース",
   },
+  {
+    id: "ec",
+    name: "E+C. 動く星空 × ミニマル",
+    desc: "Eのアニメーション背景 × Cのミニマルレイアウト。バーアニメーション確認用",
+    dot: "#f0d898",
+    tag: "実装テスト",
+  },
 ];
 
 export default function DesignTestPage() {
