@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 
 const BLOOD_TYPES = ["A", "B", "O", "AB"];
@@ -61,6 +61,12 @@ type FortuneResult = {
   lifePathNumber: number;
 };
 
+type PalmResult = {
+  lines: { life: string; heart: string; head: string; fate: string };
+  reading: string;
+  advice: string;
+};
+
 const SCORE_LABELS = [
   { key: "overall", label: "総合運" },
   { key: "love",    label: "恋愛運" },
@@ -114,6 +120,74 @@ function ScoreRow({ label, score }: { label: string; score: number }) {
   );
 }
 
+function PalmScanner({
+  onScan,
+  loading,
+}: {
+  onScan: (image: string) => void;
+  loading: boolean;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxSize = 800;
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = Math.round((height / width) * maxSize);
+            width = maxSize;
+          } else {
+            width = Math.round((width / height) * maxSize);
+            height = maxSize;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+        onScan(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  return (
+    <div className="space-y-3">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={loading}
+        className="w-full py-4 text-sm tracking-wider transition-all duration-200 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{
+          background: "linear-gradient(135deg, rgba(212,168,76,0.12), rgba(212,168,76,0.05))",
+          border: "1px solid rgba(212,168,76,0.45)",
+          color: "#e8d08a",
+        }}
+      >
+        {loading ? (
+          <span className="shimmer inline-block">手相を読み解いています ...</span>
+        ) : (
+          "✋ 手のひらを撮影して鑑定する"
+        )}
+      </button>
+    </div>
+  );
+}
+
 export default function FortunePage() {
   const [birthDate, setBirthDate] = useState("");
   const [bloodType, setBloodType] = useState("");
@@ -122,6 +196,35 @@ export default function FortunePage() {
   const [result, setResult] = useState<FortuneResult | null>(null);
   const [error, setError] = useState("");
   const [shareBonusGiven, setShareBonusGiven] = useState(false);
+  const [palmResult, setPalmResult] = useState<PalmResult | null>(null);
+  const [palmLoading, setPalmLoading] = useState(false);
+  const [palmImage, setPalmImage] = useState<string | null>(null);
+  const [palmError, setPalmError] = useState("");
+
+  async function handlePalmScan(image: string) {
+    setPalmImage(image);
+    setPalmError("");
+    setPalmLoading(true);
+    try {
+      const res = await fetch("/api/palm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image,
+          zodiac: result?.zodiac,
+          lifePathNumber: result?.lifePathNumber,
+          bloodType,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setPalmResult(data);
+    } catch (err) {
+      setPalmError(err instanceof Error ? err.message : "エラーが発生しました");
+    } finally {
+      setPalmLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -316,8 +419,100 @@ export default function FortunePage() {
                 </div>
               </div>
 
+              {/* 手相スキャン */}
+              <div className="space-y-4">
+                <div className="divider">Palm Reading</div>
+                <p className="text-center text-xs text-[#f5eedd]/50 tracking-wider">
+                  手のひらを撮影して、さらに深い鑑定を
+                </p>
+
+                {!palmResult && (
+                  <PalmScanner onScan={handlePalmScan} loading={palmLoading} />
+                )}
+
+                {palmImage && palmLoading && (
+                  <div className="flex justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={palmImage}
+                      alt="手相"
+                      className="w-32 h-32 object-cover opacity-50"
+                      style={{ border: "1px solid rgba(212,168,76,0.2)" }}
+                    />
+                  </div>
+                )}
+
+                {palmError && (
+                  <p className="text-xs text-red-400/80 text-center tracking-wider">{palmError}</p>
+                )}
+
+                {palmResult && (
+                  <div className="space-y-4 scale-in">
+                    {palmImage && (
+                      <div className="flex justify-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={palmImage}
+                          alt="手相"
+                          className="w-28 h-28 object-cover"
+                          style={{ border: "1px solid rgba(212,168,76,0.35)" }}
+                        />
+                      </div>
+                    )}
+
+                    {/* 4線 */}
+                    <div
+                      className="glass gold-border p-6 space-y-3"
+                      style={{ borderTop: "1px solid rgba(212,168,76,0.5)" }}
+                    >
+                      {[
+                        { label: "生命線", value: palmResult.lines.life },
+                        { label: "感情線", value: palmResult.lines.heart },
+                        { label: "知性線", value: palmResult.lines.head },
+                        { label: "運命線", value: palmResult.lines.fate },
+                      ].map(({ label, value }) => (
+                        <div key={label}>
+                          <p className="text-[9px] tracking-[0.25em] text-[#d4a84c]/55 uppercase mb-1">
+                            {label}
+                          </p>
+                          <p className="text-xs text-[#f5eedd]/85 leading-relaxed">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 総合鑑定 */}
+                    <div
+                      className="glass gold-border p-6"
+                      style={{ borderLeft: "2px solid rgba(212,168,76,0.5)" }}
+                    >
+                      <p className="text-[9px] tracking-[0.25em] text-[#d4a84c]/55 uppercase mb-2">
+                        総合鑑定
+                      </p>
+                      <p className="text-sm text-[#f5eedd]/90 leading-[2]">{palmResult.reading}</p>
+                    </div>
+
+                    {/* アドバイス */}
+                    <div className="text-center py-2">
+                      <p className="text-[9px] tracking-[0.25em] text-[#d4a84c]/55 uppercase mb-2">
+                        今週のアドバイス
+                      </p>
+                      <p className="text-sm text-[#e8d08a]/85 italic leading-relaxed">
+                        &ldquo;{palmResult.advice}&rdquo;
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => { setPalmResult(null); setPalmImage(null); setPalmError(""); }}
+                      className="w-full text-xs tracking-[0.3em] text-[#f5eedd]/30 hover:text-[#f0e8d8]/50 py-2 uppercase transition-colors"
+                    >
+                      手相を撮り直す
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <button
-                onClick={() => setResult(null)}
+                onClick={() => { setResult(null); setPalmResult(null); setPalmImage(null); }}
                 className="w-full text-xs tracking-[0.3em] text-[#f5eedd]/40 hover:text-[#f0e8d8]/50 py-3 uppercase transition-colors"
               >
                 もう一度鑑定する
