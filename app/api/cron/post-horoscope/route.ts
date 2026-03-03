@@ -26,23 +26,51 @@ export async function GET(req: Request) {
   });
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const today = new Date().toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "long" });
+  const now = new Date();
+  const today = now.toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "long" });
   const results: { zodiac: string; ok: boolean; error?: string }[] = [];
 
+  // 曜日ごとにテーマを変える（0=日〜6=土）
+  const THEMES = [
+    "今日の総合運と気をつけるべきこと",       // 日
+    "今週の仕事運・チャンスをつかむヒント",    // 月
+    "人間関係・コミュニケーションの運勢",      // 火
+    "恋愛運・パートナーシップについて",        // 水
+    "金運・買い物・投資のタイミング",          // 木
+    "健康運・体と心のケアアドバイス",          // 金
+    "今週の振り返りと来週への準備",            // 土
+  ];
+  const theme = THEMES[now.getDay()];
+
+  // 星座ごとに異なるフォーマットを使う
+  const FORMATS = [
+    "今日のラッキーアクションを1つ具体的に（時間帯・場所・行動）",
+    "注意すべきことと、それを乗り越えるコツ",
+    "今日のキーワードを1語挙げて、その理由を一言で",
+    "朝・昼・夜のどの時間帯に運気が高まるか",
+    "今日関わると良い人のタイプや出会いのヒント",
+  ];
+
   for (const zodiac of targets) {
+    const format = FORMATS[ZODIACS.indexOf(zodiac) % FORMATS.length];
     try {
       const res = await anthropic.messages.create({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 256,
         messages: [{
           role: "user",
-          content: `${today}の${zodiac}の運勢を、以下の条件でツイートを1件作成してください。
+          content: `${today}の${zodiac}について、テーマ「${theme}」でツイートを1件作成してください。
+
+フォーカス：${format}
+
+条件：
 ・140文字以内
-・具体的な一言アドバイスを含む（曜日・時間帯・行動など）
+・具体的な描写を含む（数字・時間帯・行動・場所など）
+・抽象的な表現（「良い運気」「チャンス到来」など）は禁止
 ・最後に「#星詠み #AI占い #${zodiac}」を付ける
-・絵文字を2〜3個使う
+・絵文字を1〜2個使う
 ・URLは含めない
-・ツイート本文のみ出力（説明文不要）`,
+・ツイート本文のみ出力`,
         }],
       });
 
