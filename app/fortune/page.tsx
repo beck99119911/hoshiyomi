@@ -104,17 +104,27 @@ function CopyButton({ shareUrl, onCopy }: { shareUrl: string; onCopy: () => void
   );
 }
 
-function ScoreRow({ label, score }: { label: string; score: number }) {
+function ScoreRow({ label, score, delay = "0s" }: { label: string; score: number; delay?: string }) {
   return (
     <div>
       <div className="flex justify-between text-xs mb-1.5">
-        <span className="text-[#f5eedd]/70 tracking-wider">{label}</span>
-        <span className="text-[#d4a84c] tracking-widest">
+        <span className="text-[#f5eedd]/60 tracking-wider">{label}</span>
+        <span className="text-[#d4a84c]/80 tracking-widest">
           {"●".repeat(score)}{"○".repeat(5 - score)}
         </span>
       </div>
       <div className="score-bar">
-        <div className="score-bar-fill" style={{ width: `${score * 20}%` }} />
+        <div
+          className="bar-anim"
+          style={{
+            height: "100%",
+            width: `${score * 20}%`,
+            background: "linear-gradient(90deg, #d4a84c, #f0d898)",
+            borderRadius: "999px",
+            boxShadow: "0 0 6px rgba(212,168,76,0.35)",
+            ["--delay" as string]: delay,
+          } as React.CSSProperties}
+        />
       </div>
     </div>
   );
@@ -303,7 +313,10 @@ export default function FortunePage() {
 
   return (
     <>
-      <div className="stars" />
+      <style>{`
+        @keyframes barFill { from { width: 0%; } }
+        .bar-anim { animation: barFill 1.2s ease forwards var(--delay, 0s); }
+      `}</style>
       <main className="relative z-10 min-h-screen text-[#f0e8d8] px-6 py-12">
         <div className="max-w-lg mx-auto">
 
@@ -339,26 +352,24 @@ export default function FortunePage() {
 
               {/* スコア */}
               <div
-                className="glass gold-border p-7 space-y-4"
-                style={{ borderTop: "1px solid rgba(212,168,76,0.5)" }}
+                className="py-6 space-y-4"
+                style={{ borderTop: "1px solid rgba(212,168,76,0.35)" }}
               >
-                {SCORE_LABELS.map(({ key, label }) => (
+                {SCORE_LABELS.map(({ key, label }, i) => (
                   <ScoreRow
                     key={key}
                     label={label}
                     score={result.scores[key as keyof typeof result.scores]}
+                    delay={`${i * 0.12}s`}
                   />
                 ))}
               </div>
 
               {/* メッセージ */}
-              <div className="space-y-1">
-                <p className="text-[10px] tracking-[0.3em] text-[#d4a84c]/50 uppercase">Message</p>
-                <div
-                  className="glass gold-border p-7"
-                  style={{ borderLeft: "2px solid rgba(212,168,76,0.5)" }}
-                >
-                  <p className="text-sm text-[#f5eedd]/90 leading-[2]">{result.message}</p>
+              <div className="space-y-3">
+                <p className="text-[9px] tracking-[0.35em] text-[#d4a84c]/45 uppercase">Message</p>
+                <div style={{ borderLeft: "2px solid rgba(212,168,76,0.4)", paddingLeft: "18px" }}>
+                  <p className="text-sm text-[#f5eedd]/85 leading-[2.1]">{result.message}</p>
                 </div>
               </div>
 
@@ -371,9 +382,10 @@ export default function FortunePage() {
                 ].map(({ label, value }) => (
                   <div
                     key={label}
-                    className="glass gold-border p-4 text-center"
+                    className="p-4 text-center"
+                    style={{ background: "rgba(212,168,76,0.04)", border: "1px solid rgba(212,168,76,0.15)" }}
                   >
-                    <p className="text-[9px] tracking-[0.2em] text-[#d4a84c]/50 uppercase mb-2">{label}</p>
+                    <p className="text-[9px] tracking-[0.2em] text-[#d4a84c]/45 uppercase mb-2">{label}</p>
                     <p className="text-sm font-bold text-[#e8d08a]">{value}</p>
                   </div>
                 ))}
@@ -481,8 +493,8 @@ export default function FortunePage() {
 
                     {/* 4線 */}
                     <div
-                      className="glass gold-border p-6 space-y-3"
-                      style={{ borderTop: "1px solid rgba(212,168,76,0.5)" }}
+                      className="py-5 space-y-4"
+                      style={{ borderTop: "1px solid rgba(212,168,76,0.3)" }}
                     >
                       {[
                         { label: "生命線", value: palmResult.lines.life },
@@ -491,23 +503,20 @@ export default function FortunePage() {
                         { label: "運命線", value: palmResult.lines.fate },
                       ].map(({ label, value }) => (
                         <div key={label}>
-                          <p className="text-[9px] tracking-[0.25em] text-[#d4a84c]/55 uppercase mb-1">
+                          <p className="text-[9px] tracking-[0.3em] text-[#d4a84c]/45 uppercase mb-1">
                             {label}
                           </p>
-                          <p className="text-xs text-[#f5eedd]/85 leading-relaxed">{value}</p>
+                          <p className="text-xs text-[#f5eedd]/80 leading-relaxed">{value}</p>
                         </div>
                       ))}
                     </div>
 
                     {/* 総合鑑定 */}
-                    <div
-                      className="glass gold-border p-6"
-                      style={{ borderLeft: "2px solid rgba(212,168,76,0.5)" }}
-                    >
-                      <p className="text-[9px] tracking-[0.25em] text-[#d4a84c]/55 uppercase mb-2">
+                    <div style={{ borderLeft: "2px solid rgba(212,168,76,0.4)", paddingLeft: "18px" }}>
+                      <p className="text-[9px] tracking-[0.25em] text-[#d4a84c]/45 uppercase mb-2">
                         総合鑑定
                       </p>
-                      <p className="text-sm text-[#f5eedd]/90 leading-[2]">{palmResult.reading}</p>
+                      <p className="text-sm text-[#f5eedd]/85 leading-[2.1]">{palmResult.reading}</p>
                     </div>
 
                     {/* アドバイス */}
@@ -693,3 +702,4 @@ export default function FortunePage() {
     </>
   );
 }
+
