@@ -63,11 +63,15 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const url = new URL(req.url);
+  const testMode = url.searchParams.get("test") === "1";
+  const targets = testMode ? [ZODIACS[0]] : ZODIACS;
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const today = new Date().toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "long" });
   const results: { zodiac: string; ok: boolean }[] = [];
 
-  for (const zodiac of ZODIACS) {
+  for (const zodiac of targets) {
     const res = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 256,
