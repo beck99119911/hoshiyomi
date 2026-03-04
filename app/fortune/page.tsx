@@ -636,13 +636,13 @@ export default function FortunePage() {
             <div>
               <div className="text-center mb-12">
                 <p className="text-[10px] tracking-[0.4em] text-[#d4a84c]/60 uppercase mb-3">
-                  Free Reading
+                  {isPremium ? "Premium Reading" : "Free Reading"}
                 </p>
                 <h1 className="text-3xl font-bold">
-                  <span className="gold-text">無料鑑定</span>
+                  <span className="gold-text">{isPremium ? "プレミアム鑑定" : "無料鑑定"}</span>
                 </h1>
                 <p className="text-xs text-[#f0e8d8]/30 tracking-wider mt-2">
-                  1日3回まで · 登録不要
+                  {isPremium ? "無制限 · プレミアム会員" : "1日3回まで · 登録不要"}
                 </p>
               </div>
 
