@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { text } = await req.json();
+  const { text, voice = "ja-JP-Neural2-B", pitch = 0, speakingRate = 0.92 } = await req.json();
   if (!text) {
     return NextResponse.json({ error: "テキストが必要です" }, { status: 400 });
   }
@@ -13,15 +13,8 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         input: { text },
-        voice: {
-          languageCode: "ja-JP",
-          name: "ja-JP-Neural2-B", // 自然な女性声
-        },
-        audioConfig: {
-          audioEncoding: "MP3",
-          speakingRate: 0.95,
-          pitch: 1.0,
-        },
+        voice: { languageCode: "ja-JP", name: voice },
+        audioConfig: { audioEncoding: "MP3", speakingRate, pitch },
       }),
     }
   );

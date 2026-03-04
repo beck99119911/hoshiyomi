@@ -83,6 +83,8 @@ export default function VoiceTestPage() {
   const [text, setText] = useState(
     "木星があなたの第5ハウスに輝いています。今週は創造性が高まり、新しい表現の扉が開きます。あなたの直感を信じてください。星があなたを導いています。"
   );
+  const [voice, setVoice] = useState("ja-JP-Neural2-B");
+  const [pitch, setPitch] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mouth, setMouth] = useState<MouthState>("closed");
@@ -98,7 +100,7 @@ export default function VoiceTestPage() {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, voice, pitch }),
       });
       if (!res.ok) throw new Error("TTS failed");
 
@@ -149,7 +151,7 @@ export default function VoiceTestPage() {
       setIsSpeaking(false);
       setMouth("closed");
     }
-  }, [text, isSpeaking, isLoading]);
+  }, [text, voice, pitch, isSpeaking, isLoading]);
 
   const stop = useCallback(() => {
     sourceRef.current?.stop();
@@ -176,6 +178,45 @@ export default function VoiceTestPage() {
 
       {/* Controls */}
       <div className="w-full max-w-sm space-y-4">
+
+        {/* 声の選択 */}
+        <div className="space-y-2">
+          <p className="text-[9px] tracking-widest text-[#c9a84c]/50 uppercase">Voice</p>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {[
+              { id: "ja-JP-Neural2-B", label: "女性A（若め）" },
+              { id: "ja-JP-Neural2-A", label: "女性B（落ち着き）" },
+              { id: "ja-JP-Neural2-D", label: "男性A（低め）" },
+              { id: "ja-JP-Neural2-C", label: "男性B（柔らか）" },
+            ].map((v) => (
+              <button
+                key={v.id}
+                onClick={() => setVoice(v.id)}
+                className={`py-2 px-3 border text-left transition-all ${
+                  voice === v.id
+                    ? "border-[#c9a84c]/70 text-[#c9a84c]"
+                    : "border-[#c9a84c]/20 text-[#f0e8d8]/40 hover:border-[#c9a84c]/40"
+                }`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ピッチ調整 */}
+        <div className="space-y-1">
+          <div className="flex justify-between text-[9px] tracking-widest text-[#c9a84c]/50 uppercase">
+            <span>Pitch</span>
+            <span>{pitch > 0 ? `+${pitch}` : pitch}</span>
+          </div>
+          <input
+            type="range" min={-6} max={6} step={1} value={pitch}
+            onChange={(e) => setPitch(Number(e.target.value))}
+            className="w-full accent-[#c9a84c]"
+          />
+        </div>
+
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
