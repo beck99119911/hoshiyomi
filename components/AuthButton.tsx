@@ -32,16 +32,29 @@ export default function AuthButton() {
   }
 
   return (
-    <button
-      onClick={() => signIn("google")}
-      className="text-[9px] tracking-[0.3em] uppercase transition-colors hover:opacity-80"
-      style={{
-        color: "rgba(212,168,76,0.7)",
-        border: "1px solid rgba(212,168,76,0.3)",
-        padding: "4px 10px",
-      }}
-    >
-      ログイン
-    </button>
+    <div className="flex items-center gap-2" translate="no">
+      <button
+        onClick={() => signIn("google")}
+        className="text-[9px] tracking-[0.3em] uppercase transition-colors hover:opacity-80"
+        style={{
+          color: "rgba(212,168,76,0.7)",
+          border: "1px solid rgba(212,168,76,0.3)",
+          padding: "4px 10px",
+        }}
+      >
+        Google
+      </button>
+      <button
+        onClick={() => signIn("line")}
+        className="text-[9px] tracking-[0.3em] uppercase transition-colors hover:opacity-80"
+        style={{
+          color: "#06C755",
+          border: "1px solid rgba(6,199,85,0.4)",
+          padding: "4px 10px",
+        }}
+      >
+        LINE
+      </button>
+    </div>
   );
 }
