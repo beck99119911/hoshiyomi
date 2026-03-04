@@ -213,27 +213,33 @@ function PalmScanner({
 }
 
 export default function FortunePage() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const [isPremium, setIsPremium] = useState(false);
+  const [premiumChecked, setPremiumChecked] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   useEffect(() => {
-    if (!session?.user) return;
+    if (sessionStatus === "loading") return;
+
+    if (!session?.user) {
+      setPremiumChecked(true);
+      return;
+    }
 
     const upgraded = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true";
 
-    // 決済完了後はすぐにpremiumとして扱う
     if (upgraded) {
       setIsPremium(true);
+      setPremiumChecked(true);
       window.history.replaceState({}, "", "/fortune");
       return;
     }
 
     fetch("/api/subscription/status")
       .then((r) => r.json())
-      .then((d) => setIsPremium(d.isPremium))
-      .catch(() => {});
-  }, [session]);
+      .then((d) => { setIsPremium(d.isPremium); setPremiumChecked(true); })
+      .catch(() => setPremiumChecked(true));
+  }, [session, sessionStatus]);
 
   async function handleUpgrade() {
     if (!session?.user) return;
@@ -756,7 +762,7 @@ export default function FortunePage() {
               </form>
 
               {/* プレミアムバナー */}
-              {!isPremium && session?.user && (
+              {premiumChecked && !isPremium && session?.user && (
                 <div
                   className="mt-10 p-6 text-center space-y-3"
                   style={{ border: "1px solid rgba(212,168,76,0.2)", background: "rgba(212,168,76,0.03)" }}
@@ -781,7 +787,7 @@ export default function FortunePage() {
                 </div>
               )}
 
-              {!isPremium && !session?.user && (
+              {premiumChecked && !isPremium && !session?.user && (
                 <p className="mt-8 text-center text-[10px] text-[#f0e8d8]/30 tracking-wider">
                   ログインするとプレミアムプランをご利用いただけます（¥980/月）
                 </p>
