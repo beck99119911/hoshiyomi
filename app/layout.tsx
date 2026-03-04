@@ -34,6 +34,14 @@ export const metadata: Metadata = {
   },
 };
 
+const SHOOTING_STARS = [
+  { t: "8%",  l: "68%", dur: "18s", dl: "1s"  },
+  { t: "4%",  l: "80%", dur: "22s", dl: "8s"  },
+  { t: "16%", l: "62%", dur: "20s", dl: "14s" },
+  { t: "6%",  l: "75%", dur: "25s", dl: "4s"  },
+  { t: "12%", l: "88%", dur: "19s", dl: "11s" },
+];
+
 const STARS = [
   { t: "8%",  l: "12%", s: 2,   d: "2.1s", dl: "0s"   },
   { t: "22%", l: "83%", s: 1.5, d: "1.8s", dl: "0.5s" },
@@ -111,6 +119,25 @@ export default function RootLayout({
                   : `0 0 ${star.s * 2}px rgba(255,255,255,0.5)`,
                 ["--dur" as string]: star.d,
                 ["--delay" as string]: star.dl,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* 流れ星 */}
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          {SHOOTING_STARS.map((ss, i) => (
+            <div
+              key={i}
+              className="shooting-star"
+              style={{
+                top: ss.t,
+                left: ss.l,
+                animationName: "shoot",
+                animationDuration: ss.dur,
+                animationTimingFunction: "linear",
+                animationIterationCount: "infinite",
+                animationDelay: ss.dl,
               }}
             />
           ))}
