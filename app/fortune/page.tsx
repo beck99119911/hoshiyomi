@@ -229,10 +229,8 @@ export default function FortunePage() {
     const upgraded = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true";
 
     if (upgraded) {
-      setIsPremium(true);
-      setPremiumChecked(true);
       localStorage.setItem(`premium_${session.user.id}`, "1");
-      window.history.replaceState({}, "", "/fortune");
+      window.location.replace("/fortune");
       return;
     }
 
