@@ -83,8 +83,8 @@ export default function VoiceTestPage() {
   const [text, setText] = useState(
     "木星があなたの第5ハウスに輝いています。今週は創造性が高まり、新しい表現の扉が開きます。あなたの直感を信じてください。星があなたを導いています。"
   );
-  const [voice, setVoice] = useState("ja-JP-Neural2-B");
-  const [pitch, setPitch] = useState(0);
+  const [voice, setVoice] = useState("ja-JP-Neural2-D");
+  const [pitch, setPitch] = useState(-4);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mouth, setMouth] = useState<MouthState>("closed");
