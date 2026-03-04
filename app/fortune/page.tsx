@@ -231,13 +231,30 @@ export default function FortunePage() {
     if (upgraded) {
       setIsPremium(true);
       setPremiumChecked(true);
+      localStorage.setItem(`premium_${session.user.id}`, "1");
       window.history.replaceState({}, "", "/fortune");
       return;
     }
 
+    // キャッシュがあれば即座に反映
+    const cached = localStorage.getItem(`premium_${session.user.id}`);
+    if (cached === "1") {
+      setIsPremium(true);
+      setPremiumChecked(true);
+    }
+
+    // バックグラウンドで確認（キャッシュ更新）
     fetch("/api/subscription/status")
       .then((r) => r.json())
-      .then((d) => { setIsPremium(d.isPremium); setPremiumChecked(true); })
+      .then((d) => {
+        setIsPremium(d.isPremium);
+        setPremiumChecked(true);
+        const uid = session?.user?.id;
+        if (uid) {
+          if (d.isPremium) localStorage.setItem(`premium_${uid}`, "1");
+          else localStorage.removeItem(`premium_${uid}`);
+        }
+      })
       .catch(() => setPremiumChecked(true));
   }, [session, sessionStatus]);
 
