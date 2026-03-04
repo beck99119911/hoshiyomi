@@ -399,7 +399,11 @@ export default function FortunePage() {
             >
               ← Hoshiyomi
             </Link>
-            {!premiumChecked ? null : isPremium ? (
+            {!premiumChecked && session?.user ? (
+              <span className="text-[9px] tracking-widest text-[#f5eedd]/25 uppercase shimmer inline-block">
+                確認中...
+              </span>
+            ) : isPremium ? (
               <button
                 onClick={handlePortal}
                 disabled={checkoutLoading}
