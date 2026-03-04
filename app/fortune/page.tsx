@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const BLOOD_TYPES = ["A", "B", "O", "AB"];
 const MAX_DAILY = 3;
@@ -212,6 +213,42 @@ function PalmScanner({
 }
 
 export default function FortunePage() {
+  const { data: session } = useSession();
+  const [isPremium, setIsPremium] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetch("/api/subscription/status")
+        .then((r) => r.json())
+        .then((d) => setIsPremium(d.isPremium))
+        .catch(() => {});
+    }
+  }, [session]);
+
+  async function handleUpgrade() {
+    if (!session?.user) return;
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      setCheckoutLoading(false);
+    }
+  }
+
+  async function handlePortal() {
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      setCheckoutLoading(false);
+    }
+  }
+
   const [birthYear, setBirthYear] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const [birthDay, setBirthDay] = useState("");
@@ -259,11 +296,13 @@ export default function FortunePage() {
     e.preventDefault();
     setError("");
 
-    const count = getDailyCount();
-    const max = getMaxDaily();
-    if (count >= max) {
-      setError(`本日の鑑定（${max}回）に達しました。また明日お越しください。`);
-      return;
+    if (!isPremium) {
+      const count = getDailyCount();
+      const max = getMaxDaily();
+      if (count >= max) {
+        setError(`本日の鑑定（${max}回）に達しました。プレミアムプランで無制限に鑑定できます。`);
+        return;
+      }
     }
 
     setLoading(true);
@@ -328,9 +367,20 @@ export default function FortunePage() {
             >
               ← Hoshiyomi
             </Link>
-            <span className="text-xs tracking-widest text-[#f5eedd]/35 uppercase">
-              Free Reading
-            </span>
+            {isPremium ? (
+              <button
+                onClick={handlePortal}
+                disabled={checkoutLoading}
+                className="text-[9px] tracking-[0.3em] uppercase transition-colors hover:opacity-80 disabled:opacity-50"
+                style={{ color: "#d4a84c", border: "1px solid rgba(212,168,76,0.4)", padding: "4px 10px" }}
+              >
+                ✦ Premium
+              </button>
+            ) : (
+              <span className="text-xs tracking-widest text-[#f5eedd]/35 uppercase">
+                Free Reading
+              </span>
+            )}
           </div>
 
           {/* ── 結果画面 ── */}
@@ -695,6 +745,38 @@ export default function FortunePage() {
                   )}
                 </button>
               </form>
+
+              {/* プレミアムバナー */}
+              {!isPremium && session?.user && (
+                <div
+                  className="mt-10 p-6 text-center space-y-3"
+                  style={{ border: "1px solid rgba(212,168,76,0.2)", background: "rgba(212,168,76,0.03)" }}
+                >
+                  <p className="text-[9px] tracking-[0.4em] text-[#d4a84c]/50 uppercase">Premium</p>
+                  <p className="text-sm text-[#f0e8d8]/70 leading-relaxed">
+                    無制限に鑑定 · 手相スキャン優先 · 深い洞察
+                  </p>
+                  <p className="text-xs text-[#d4a84c]/60">¥980 / 月</p>
+                  <button
+                    onClick={handleUpgrade}
+                    disabled={checkoutLoading}
+                    className="w-full py-3 text-sm tracking-widest uppercase transition-all duration-300 hover:opacity-80 disabled:opacity-50"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(212,168,76,0.18), rgba(212,168,76,0.08))",
+                      border: "1px solid rgba(212,168,76,0.5)",
+                      color: "#e8d08a",
+                    }}
+                  >
+                    {checkoutLoading ? "処理中..." : "プレミアムに登録する →"}
+                  </button>
+                </div>
+              )}
+
+              {!isPremium && !session?.user && (
+                <p className="mt-8 text-center text-[10px] text-[#f0e8d8]/30 tracking-wider">
+                  ログインするとプレミアムプランをご利用いただけます（¥980/月）
+                </p>
+              )}
             </div>
           )}
         </div>
