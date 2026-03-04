@@ -218,12 +218,28 @@ export default function FortunePage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   useEffect(() => {
-    if (session?.user) {
-      fetch("/api/subscription/status")
-        .then((r) => r.json())
-        .then((d) => setIsPremium(d.isPremium))
-        .catch(() => {});
+    if (!session?.user) return;
+
+    const upgraded = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true";
+
+    async function checkStatus(retries = 0): Promise<void> {
+      try {
+        const r = await fetch("/api/subscription/status");
+        const d = await r.json();
+        if (d.isPremium) {
+          setIsPremium(true);
+          // URLからupgradedパラメータを除去
+          window.history.replaceState({}, "", "/fortune");
+        } else if (upgraded && retries < 6) {
+          // webhookの処理待ち: 2秒おきに最大6回リトライ
+          setTimeout(() => checkStatus(retries + 1), 2000);
+        }
+      } catch {
+        // ignore
+      }
     }
+
+    checkStatus();
   }, [session]);
 
   async function handleUpgrade() {
