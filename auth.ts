@@ -15,7 +15,7 @@ const LINE: OAuthConfig<LINEProfile> = {
   type: "oauth",
   authorization: {
     url: "https://access.line.me/oauth2/v2.1/authorize",
-    params: { scope: "openid profile" },
+    params: { scope: "profile" },
   },
   token: "https://api.line.me/oauth2/v2.1/token",
   userinfo: "https://api.line.me/v2/profile",
