@@ -86,13 +86,6 @@ export default function Home() {
         {/* 右上ナビ */}
         <div className="absolute top-6 right-6 flex items-center gap-4">
           <AuthButton />
-          <Link
-            href="/design-test"
-            className="text-[9px] tracking-[0.3em] uppercase opacity-15 hover:opacity-40 transition-opacity"
-            style={{ color: "#c9a84c" }}
-          >
-            Design
-          </Link>
         </div>
 
         {/* スクロール */}
