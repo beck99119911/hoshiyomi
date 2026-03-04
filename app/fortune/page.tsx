@@ -399,7 +399,7 @@ export default function FortunePage() {
             >
               ← Hoshiyomi
             </Link>
-            {isPremium ? (
+            {!premiumChecked ? null : isPremium ? (
               <button
                 onClick={handlePortal}
                 disabled={checkoutLoading}
