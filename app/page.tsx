@@ -88,11 +88,6 @@ export default function Home() {
           <AuthButton />
         </div>
 
-        {/* スクロール */}
-        <div className="absolute bottom-10 flex flex-col items-center gap-2 text-[#c9a84c]/30">
-          <span className="text-[10px] tracking-widest">SCROLL</span>
-          <div className="w-px h-10 bg-gradient-to-b from-[#c9a84c]/30 to-transparent" />
-        </div>
       </section>
 
       {/* ── 3つの占術 ── */}
