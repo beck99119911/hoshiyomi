@@ -35,11 +35,12 @@ export const metadata: Metadata = {
 };
 
 const SHOOTING_STARS = [
-  { t: "8%",  l: "68%", dur: "15s", dl: "0s"  },
-  { t: "4%",  l: "80%", dur: "18s", dl: "5s"  },
-  { t: "16%", l: "62%", dur: "20s", dl: "10s" },
-  { t: "6%",  l: "75%", dur: "22s", dl: "3s"  },
-  { t: "12%", l: "88%", dur: "17s", dl: "13s" },
+  { t: "5%",  l: "70%", dur: "15s", dl: "0s"  },
+  { t: "3%",  l: "85%", dur: "18s", dl: "5s"  },
+  { t: "10%", l: "50%", dur: "20s", dl: "9s"  },
+  { t: "8%",  l: "75%", dur: "22s", dl: "3s"  },
+  { t: "2%",  l: "60%", dur: "17s", dl: "13s" },
+  { t: "14%", l: "90%", dur: "21s", dl: "7s"  },
 ];
 
 const STARS = [
