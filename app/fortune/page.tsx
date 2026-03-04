@@ -222,24 +222,17 @@ export default function FortunePage() {
 
     const upgraded = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("upgraded") === "true";
 
-    async function checkStatus(retries = 0): Promise<void> {
-      try {
-        const r = await fetch("/api/subscription/status");
-        const d = await r.json();
-        if (d.isPremium) {
-          setIsPremium(true);
-          // URLからupgradedパラメータを除去
-          window.history.replaceState({}, "", "/fortune");
-        } else if (upgraded && retries < 6) {
-          // webhookの処理待ち: 2秒おきに最大6回リトライ
-          setTimeout(() => checkStatus(retries + 1), 2000);
-        }
-      } catch {
-        // ignore
-      }
+    // 決済完了後はすぐにpremiumとして扱う
+    if (upgraded) {
+      setIsPremium(true);
+      window.history.replaceState({}, "", "/fortune");
+      return;
     }
 
-    checkStatus();
+    fetch("/api/subscription/status")
+      .then((r) => r.json())
+      .then((d) => setIsPremium(d.isPremium))
+      .catch(() => {});
   }, [session]);
 
   async function handleUpgrade() {
