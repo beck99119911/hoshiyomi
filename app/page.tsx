@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthButton from "@/components/AuthButton";
 
 export default function Home() {
   return (
@@ -82,14 +83,17 @@ export default function Home() {
           </p>
         </div>
 
-        {/* デザインテスト（開発用） */}
-        <Link
-          href="/design-test"
-          className="absolute top-6 right-6 text-[9px] tracking-[0.3em] uppercase opacity-15 hover:opacity-40 transition-opacity"
-          style={{ color: "#c9a84c" }}
-        >
-          Design
-        </Link>
+        {/* 右上ナビ */}
+        <div className="absolute top-6 right-6 flex items-center gap-4">
+          <AuthButton />
+          <Link
+            href="/design-test"
+            className="text-[9px] tracking-[0.3em] uppercase opacity-15 hover:opacity-40 transition-opacity"
+            style={{ color: "#c9a84c" }}
+          >
+            Design
+          </Link>
+        </div>
 
         {/* スクロール */}
         <div className="absolute bottom-10 flex flex-col items-center gap-2 text-[#c9a84c]/30">
