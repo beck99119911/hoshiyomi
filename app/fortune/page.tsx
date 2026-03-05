@@ -1,8 +1,34 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+
+type MouthState = "closed" | "half" | "open";
+
+const FACE_SRC: Record<MouthState, string> = {
+  closed: "/character/face_closed.png",
+  half:   "/character/face_half.png",
+  open:   "/character/face_half.png",
+};
+
+function Character({ mouth }: { mouth: MouthState }) {
+  return (
+    <div className="relative mx-auto" style={{ width: 220, height: 250 }}>
+      <div
+        className="absolute inset-0 blur-2xl opacity-15 pointer-events-none"
+        style={{ background: "radial-gradient(circle at 50% 40%, #7850c8, transparent 70%)" }}
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={FACE_SRC[mouth]}
+        alt="占い師"
+        className="w-full h-full object-cover"
+        style={{ objectPosition: "50% 15%" }}
+      />
+    </div>
+  );
+}
 
 const BLOOD_TYPES = ["A", "B", "O", "AB"];
 const MAX_DAILY = 3;
@@ -279,6 +305,60 @@ export default function FortunePage() {
     }
   }
 
+  // TTS
+  const [mouth, setMouth] = useState<MouthState>("closed");
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [ttsReady, setTtsReady] = useState(false);
+  const cachedAudioRef = useRef<ArrayBuffer | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const animFrameRef = useRef<number>(0);
+
+  const stopAudio = useCallback(() => {
+    sourceRef.current?.stop();
+    cancelAnimationFrame(animFrameRef.current);
+    audioCtxRef.current?.close();
+    audioCtxRef.current = null;
+    setMouth("closed");
+    setIsSpeaking(false);
+  }, []);
+
+  const playAudio = useCallback(async () => {
+    if (isSpeaking || !cachedAudioRef.current) return;
+    setIsSpeaking(true);
+
+    const audioCtx = new AudioContext();
+    audioCtxRef.current = audioCtx;
+    const audioBuffer = await audioCtx.decodeAudioData(cachedAudioRef.current.slice(0));
+    const source = audioCtx.createBufferSource();
+    sourceRef.current = source;
+    source.buffer = audioBuffer;
+
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    const timeData = new Uint8Array(analyser.fftSize);
+    const animate = () => {
+      analyser.getByteTimeDomainData(timeData);
+      let sum = 0;
+      for (const v of timeData) { const n = (v - 128) / 128; sum += n * n; }
+      const rms = Math.sqrt(sum / timeData.length);
+      setMouth(rms > 0.08 ? "open" : rms > 0.02 ? "half" : "closed");
+      animFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    source.start();
+    animate();
+    source.onended = () => {
+      cancelAnimationFrame(animFrameRef.current);
+      setMouth("closed");
+      setIsSpeaking(false);
+      audioCtx.close();
+    };
+  }, [isSpeaking]);
+
   const [birthYear, setBirthYear] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const [birthDay, setBirthDay] = useState("");
@@ -296,6 +376,26 @@ export default function FortunePage() {
   const [palmLoading, setPalmLoading] = useState(false);
   const [palmImage, setPalmImage] = useState<string | null>(null);
   const [palmError, setPalmError] = useState("");
+
+  // 結果が出たらTTS音声をバックグラウンドで生成・キャッシュ
+  useEffect(() => {
+    if (!result) return;
+    cachedAudioRef.current = null;
+    setTtsReady(false);
+    setMouth("closed");
+
+    fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: result.message }),
+    })
+      .then((r) => r.arrayBuffer())
+      .then((buf) => {
+        cachedAudioRef.current = buf;
+        setTtsReady(true);
+      })
+      .catch(() => {});
+  }, [result]);
 
   async function handlePalmScan(image: string) {
     setPalmImage(image);
@@ -420,6 +520,23 @@ export default function FortunePage() {
           {/* ── 結果画面 ── */}
           {result ? (
             <div className="scale-in space-y-8">
+
+              {/* キャラクター */}
+              <div className="flex flex-col items-center gap-3">
+                <Character mouth={mouth} />
+                <button
+                  onClick={isSpeaking ? stopAudio : playAudio}
+                  disabled={!ttsReady}
+                  className="px-6 py-2 text-xs tracking-[0.3em] uppercase border transition-all disabled:opacity-30"
+                  style={{
+                    borderColor: isSpeaking ? "rgba(212,168,76,0.6)" : "rgba(212,168,76,0.3)",
+                    color: isSpeaking ? "#d4a84c" : "rgba(240,232,216,0.5)",
+                    background: isSpeaking ? "rgba(212,168,76,0.08)" : "transparent",
+                  }}
+                >
+                  {!ttsReady ? "準備中..." : isSpeaking ? "■ 停止" : "▶ 読み上げ"}
+                </button>
+              </div>
 
               {/* ヘッダー */}
               <div className="text-center space-y-2">
