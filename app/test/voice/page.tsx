@@ -3,79 +3,55 @@ import { useState, useRef, useCallback } from "react";
 
 type MouthState = "closed" | "half" | "open";
 
+// 口スプライトシートの1セル表示サイズ（調整可）
+const MOUTH_W = 160;
+const MOUTH_H = 80;
+
+// 顔画像上の口の位置（調整可）
+const MOUTH_TOP = "64%";   // 上からの位置
+const MOUTH_LEFT = "50%";  // 左からの位置（中央基準）
+
 function Character({ mouth }: { mouth: MouthState }) {
+  // mouth_sheet.png は 2×2グリッド（左上:closed, 左下:half, 右下:open）
+  const mouthPos: Record<MouthState, string> = {
+    closed: `0px 0px`,
+    half:   `0px -${MOUTH_H}px`,
+    open:   `-${MOUTH_W}px -${MOUTH_H}px`,
+  };
+
   return (
-    <svg viewBox="0 0 120 155" width="200" height="258" className="mx-auto drop-shadow-lg">
-      <defs>
-        <radialGradient id="faceGlow" cx="50%" cy="60%" r="50%">
-          <stop offset="0%" stopColor="rgba(120,80,200,0.18)" />
-          <stop offset="100%" stopColor="transparent" />
-        </radialGradient>
-        <radialGradient id="irisL" cx="35%" cy="35%" r="60%">
-          <stop offset="0%" stopColor="#a070e0" />
-          <stop offset="100%" stopColor="#4020a0" />
-        </radialGradient>
-        <radialGradient id="irisR" cx="35%" cy="35%" r="60%">
-          <stop offset="0%" stopColor="#a070e0" />
-          <stop offset="100%" stopColor="#4020a0" />
-        </radialGradient>
-      </defs>
+    <div className="relative mx-auto" style={{ width: 300, height: 340 }}>
+      {/* Glow */}
+      <div
+        className="absolute inset-0 blur-3xl opacity-20 pointer-events-none"
+        style={{ background: "radial-gradient(circle at 50% 40%, #7850c8, transparent 70%)" }}
+      />
 
-      {/* Ambient glow */}
-      <ellipse cx="60" cy="85" rx="56" ry="64" fill="url(#faceGlow)" />
+      {/* 顔画像 */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/character/face.png"
+        alt="占い師"
+        className="w-full h-full object-cover"
+        style={{ objectPosition: "50% 15%" }}
+      />
 
-      {/* Hair back */}
-      <ellipse cx="60" cy="44" rx="43" ry="36" fill="#08050f" />
-      {/* Side hair strands */}
-      <path d="M 19 72 Q 10 100 16 128" stroke="#08050f" strokeWidth="11" fill="none" strokeLinecap="round" />
-      <path d="M 101 72 Q 110 100 104 128" stroke="#08050f" strokeWidth="11" fill="none" strokeLinecap="round" />
-
-      {/* Face */}
-      <ellipse cx="60" cy="96" rx="37" ry="47" fill="#1a1030" stroke="rgba(212,168,76,0.3)" strokeWidth="0.8" />
-
-      {/* Hair front (bangs) */}
-      <ellipse cx="60" cy="51" rx="40" ry="22" fill="#08050f" />
-      <path d="M 26 63 Q 32 75 38 70" stroke="#08050f" strokeWidth="7" fill="none" strokeLinecap="round" />
-      <path d="M 94 63 Q 88 75 82 70" stroke="#08050f" strokeWidth="7" fill="none" strokeLinecap="round" />
-
-      {/* Eyebrows */}
-      <path d="M 34 74 Q 42 70 49 73" stroke="rgba(212,168,76,0.7)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-      <path d="M 71 73 Q 78 70 86 74" stroke="rgba(212,168,76,0.7)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-
-      {/* Left eye */}
-      <ellipse cx="42" cy="83" rx="9" ry="8" fill="#ede8f8" />
-      <ellipse cx="42" cy="84" rx="6" ry="6.5" fill="url(#irisL)" />
-      <ellipse cx="42" cy="84" rx="3.5" ry="4" fill="#060410" />
-      <ellipse cx="44" cy="82" rx="1.5" ry="1.5" fill="rgba(255,255,255,0.9)" />
-      <ellipse cx="40" cy="85" rx="0.8" ry="0.8" fill="rgba(255,255,255,0.4)" />
-
-      {/* Right eye */}
-      <ellipse cx="78" cy="83" rx="9" ry="8" fill="#ede8f8" />
-      <ellipse cx="78" cy="84" rx="6" ry="6.5" fill="url(#irisR)" />
-      <ellipse cx="78" cy="84" rx="3.5" ry="4" fill="#060410" />
-      <ellipse cx="80" cy="82" rx="1.5" ry="1.5" fill="rgba(255,255,255,0.9)" />
-      <ellipse cx="76" cy="85" rx="0.8" ry="0.8" fill="rgba(255,255,255,0.4)" />
-
-      {/* Nose */}
-      <path d="M 57 99 Q 60 103 63 99" stroke="rgba(212,168,76,0.2)" strokeWidth="1" fill="none" strokeLinecap="round" />
-
-      {/* Mouth */}
-      {mouth === "closed" && (
-        <path d="M 48 115 Q 60 121 72 115" stroke="#c9a84c" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      )}
-      {mouth === "half" && (
-        <ellipse cx="60" cy="116" rx="9" ry="5" fill="#060410" stroke="#c9a84c" strokeWidth="0.8" />
-      )}
-      {mouth === "open" && (
-        <ellipse cx="60" cy="116" rx="12" ry="9" fill="#060410" stroke="#c9a84c" strokeWidth="0.8" />
-      )}
-
-      {/* Ear decorations */}
-      <circle cx="23" cy="96" r="2.5" fill="none" stroke="rgba(212,168,76,0.45)" strokeWidth="0.8" />
-      <circle cx="97" cy="96" r="2.5" fill="none" stroke="rgba(212,168,76,0.45)" strokeWidth="0.8" />
-      <circle cx="23" cy="96" r="1" fill="rgba(212,168,76,0.3)" />
-      <circle cx="97" cy="96" r="1" fill="rgba(212,168,76,0.3)" />
-    </svg>
+      {/* 口オーバーレイ（スプライトシート） */}
+      <div
+        className="absolute"
+        style={{
+          left: MOUTH_LEFT,
+          top: MOUTH_TOP,
+          transform: "translateX(-50%)",
+          width: MOUTH_W,
+          height: MOUTH_H,
+          backgroundImage: "url(/character/mouth_sheet.png)",
+          backgroundSize: `${MOUTH_W * 2}px ${MOUTH_H * 2}px`,
+          backgroundPosition: mouthPos[mouth],
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+    </div>
   );
 }
 
@@ -167,12 +143,8 @@ export default function VoiceTestPage() {
         Voice Test · Dev Only
       </p>
 
-      {/* Character */}
-      <div className="mb-8 relative">
-        <div
-          className="absolute inset-0 rounded-full blur-2xl"
-          style={{ background: "radial-gradient(circle, rgba(120,80,200,0.15) 0%, transparent 70%)" }}
-        />
+      {/* キャラクター */}
+      <div className="mb-8">
         <Character mouth={mouth} />
       </div>
 
