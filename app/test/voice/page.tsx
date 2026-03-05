@@ -3,22 +3,13 @@ import { useState, useRef, useCallback } from "react";
 
 type MouthState = "closed" | "half" | "open";
 
-// 口スプライトシートの1セル表示サイズ（調整可）
-const MOUTH_W = 160;
-const MOUTH_H = 80;
-
-// 顔画像上の口の位置（調整可）
-const MOUTH_TOP = "64%";   // 上からの位置
-const MOUTH_LEFT = "50%";  // 左からの位置（中央基準）
+const FACE_SRC: Record<MouthState, string> = {
+  closed: "/character/face_closed.png",
+  half:   "/character/face_half.png",
+  open:   "/character/face_open.png",
+};
 
 function Character({ mouth }: { mouth: MouthState }) {
-  // mouth_sheet.png は 2×2グリッド（左上:closed, 左下:half, 右下:open）
-  const mouthPos: Record<MouthState, string> = {
-    closed: `0px 0px`,
-    half:   `0px -${MOUTH_H}px`,
-    open:   `-${MOUTH_W}px -${MOUTH_H}px`,
-  };
-
   return (
     <div className="relative mx-auto" style={{ width: 300, height: 340 }}>
       {/* Glow */}
@@ -26,28 +17,12 @@ function Character({ mouth }: { mouth: MouthState }) {
         className="absolute inset-0 blur-3xl opacity-20 pointer-events-none"
         style={{ background: "radial-gradient(circle at 50% 40%, #7850c8, transparent 70%)" }}
       />
-
-      {/* 顔画像 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/character/face.png"
+        src={FACE_SRC[mouth]}
         alt="占い師"
         className="w-full h-full object-cover"
         style={{ objectPosition: "50% 15%" }}
-      />
-
-      {/* 口オーバーレイ */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/character/mouth_closed.png"
-        alt=""
-        className="absolute"
-        style={{
-          left: MOUTH_LEFT,
-          top: MOUTH_TOP,
-          transform: "translateX(-50%)",
-          width: MOUTH_W,
-        }}
       />
     </div>
   );
