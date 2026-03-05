@@ -6,7 +6,7 @@ type MouthState = "closed" | "half" | "open";
 const FACE_SRC: Record<MouthState, string> = {
   closed: "/character/face_closed.png",
   half:   "/character/face_half.png",
-  open:   "/character/face_open.png",
+  open:   "/character/face_half.png",
 };
 
 function Character({ mouth }: { mouth: MouthState }) {
