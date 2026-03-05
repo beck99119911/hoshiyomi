@@ -763,6 +763,19 @@ export default function FortunePage() {
                 )}
               </div>
 
+              {/* 相性診断バナー */}
+              <Link
+                href="/compatibility"
+                className="flex items-center justify-between w-full px-5 py-4 transition-all hover:opacity-80"
+                style={{ background: "rgba(212,168,76,0.05)", border: "1px solid rgba(212,168,76,0.2)" }}
+              >
+                <div>
+                  <p className="text-xs tracking-[0.2em] text-[#d4a84c]/70 uppercase mb-0.5">Compatibility</p>
+                  <p className="text-sm text-[#f0e8d8]/70">気になる相手との相性を診断する</p>
+                </div>
+                <span className="text-[#d4a84c]/50 text-lg">→</span>
+              </Link>
+
               <button
                 onClick={() => { setResult(null); setPalmResult(null); setPalmImage(null); }}
                 className="w-full text-xs tracking-[0.3em] text-[#f5eedd]/40 hover:text-[#f0e8d8]/50 py-3 uppercase transition-colors"
