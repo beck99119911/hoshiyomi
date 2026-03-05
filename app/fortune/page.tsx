@@ -309,6 +309,7 @@ export default function FortunePage() {
   const [mouth, setMouth] = useState<MouthState>("closed");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [ttsReady, setTtsReady] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const cachedAudioRef = useRef<ArrayBuffer | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -356,6 +357,7 @@ export default function FortunePage() {
       setMouth("closed");
       setIsSpeaking(false);
       audioCtx.close();
+      if (!isPremium) setShowUpgradePrompt(true);
     };
   }, [isSpeaking]);
 
@@ -383,11 +385,18 @@ export default function FortunePage() {
     cachedAudioRef.current = null;
     setTtsReady(false);
     setMouth("closed");
+    setShowUpgradePrompt(false);
+
+    // 無料ユーザーは最初の2文のみ読み上げ
+    const sentences = result.message.split("。").filter((s) => s.trim());
+    const ttsText = isPremium
+      ? result.message
+      : sentences.slice(0, 2).join("。") + "。";
 
     fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: result.message }),
+      body: JSON.stringify({ text: ttsText }),
     })
       .then((r) => r.arrayBuffer())
       .then((buf) => {
@@ -536,6 +545,20 @@ export default function FortunePage() {
                 >
                   {!ttsReady ? "準備中..." : isSpeaking ? "■ 停止" : "▶ 読み上げ"}
                 </button>
+                {showUpgradePrompt && !isPremium && session?.user && (
+                  <button
+                    onClick={handleUpgrade}
+                    disabled={checkoutLoading}
+                    className="text-xs tracking-wider text-[#d4a84c]/80 hover:text-[#d4a84c] transition-colors underline underline-offset-2"
+                  >
+                    ✦ 続きをすべて聴く（プレミアム）
+                  </button>
+                )}
+                {showUpgradePrompt && !isPremium && !session?.user && (
+                  <p className="text-[10px] text-[#d4a84c]/60 tracking-wider text-center">
+                    ✦ 続きはログイン＆プレミアムで
+                  </p>
+                )}
               </div>
 
               {/* ヘッダー */}
