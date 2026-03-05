@@ -36,19 +36,17 @@ function Character({ mouth }: { mouth: MouthState }) {
         style={{ objectPosition: "50% 15%" }}
       />
 
-      {/* 口オーバーレイ（スプライトシート） */}
-      <div
+      {/* 口オーバーレイ */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/character/mouth_closed.png"
+        alt=""
         className="absolute"
         style={{
           left: MOUTH_LEFT,
           top: MOUTH_TOP,
           transform: "translateX(-50%)",
           width: MOUTH_W,
-          height: MOUTH_H,
-          backgroundImage: "url(/character/mouth_sheet.png)",
-          backgroundSize: `${MOUTH_W * 2}px ${MOUTH_H * 2}px`,
-          backgroundPosition: mouthPos[mouth],
-          backgroundRepeat: "no-repeat",
         }}
       />
     </div>
