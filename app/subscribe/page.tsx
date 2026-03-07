@@ -202,8 +202,23 @@ export default function SubscribePage() {
             {loading ? <span className="shimmer inline-block">処理中 ...</span> : "¥980/月で登録する →"}
           </button>
 
+          {/* PAY.JP セキュリティバッジ */}
+          <div
+            className="flex items-center justify-center gap-3 py-3 px-4"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <span className="text-[#f0e8d8]/40 text-lg">🔒</span>
+            <div className="text-center">
+              <p className="text-[10px] text-[#f0e8d8]/50 tracking-wider">
+                決済は <a href="https://pay.jp" target="_blank" rel="noopener noreferrer" className="underline text-[#f0e8d8]/70 hover:text-[#f0e8d8]">PAY.JP</a> が安全に処理します
+              </p>
+              <p className="text-[9px] text-[#f0e8d8]/25 tracking-wider mt-0.5">
+                カード情報は当サイトのサーバーには送信されません
+              </p>
+            </div>
+          </div>
+
           <p className="text-center text-[10px] text-[#f0e8d8]/20 tracking-wider leading-relaxed">
-            クレジットカード情報はPAY.JPにより安全に処理されます。<br />
             毎月自動更新。マイページよりいつでも解約できます。
           </p>
         </form>
