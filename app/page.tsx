@@ -208,6 +208,13 @@ export default function Home() {
             <span className="text-[#c9a84c] group-hover:translate-x-1 transition-transform">→</span>
           </Link>
         </div>
+
+        {/* フッター */}
+        <footer className="mt-20 pb-8 flex justify-center gap-6 text-[10px] tracking-[0.2em] text-[#f5eedd]/25">
+          <Link href="/terms" className="hover:text-[#d4a84c]/60 transition-colors">利用規約</Link>
+          <Link href="/privacy" className="hover:text-[#d4a84c]/60 transition-colors">プライバシーポリシー</Link>
+          <Link href="/tokusho" className="hover:text-[#d4a84c]/60 transition-colors">特定商取引法</Link>
+        </footer>
       </section>
     </main>
     </>

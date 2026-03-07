@@ -157,10 +157,10 @@ export default function SubscribePage() {
           style={{ background: "rgba(212,168,76,0.04)", border: "1px solid rgba(212,168,76,0.2)" }}
         >
           {[
-            "詳細な鑑定メッセージ（フルテキスト）",
-            "AIによる個別アドバイス",
+            "運勢・手相を1日何度でも（無制限）",
+            "鑑定メッセージ全文を音声で聴ける",
             "相性診断の全結果表示",
-            "手相鑑定へのアクセス",
+            "相性診断のAIアドバイス全表示",
           ].map((item) => (
             <div key={item} className="flex items-center gap-3 text-sm text-[#f5eedd]/70">
               <span className="text-[#d4a84c]">✦</span>

@@ -405,6 +405,15 @@ export default function FortunePage() {
   }, [result]);
 
   async function handlePalmScan(image: string) {
+    if (!isPremium) {
+      const count = getDailyCount();
+      const max = getMaxDaily();
+      if (count >= max) {
+        setPalmError(`本日の鑑定（${max}回）に達しました。プレミアムプランで無制限に鑑定できます。`);
+        return;
+      }
+    }
+
     setPalmImage(image);
     setPalmError("");
     setPalmLoading(true);
@@ -421,6 +430,7 @@ export default function FortunePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      incrementDailyCount();
       setPalmResult(data);
     } catch (err) {
       setPalmError(err instanceof Error ? err.message : "エラーが発生しました");
