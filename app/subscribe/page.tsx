@@ -28,8 +28,9 @@ export default function SubscribePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  type CardElement = { mount: (selector: string) => void; unmount: () => void };
   const payjpRef = useRef<ReturnType<typeof window.Payjp> | null>(null);
-  const cardElementRef = useRef<ReturnType<ReturnType<typeof window.Payjp>["elements"]>["create"] | null>(null);
+  const cardElementRef = useRef<CardElement | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
