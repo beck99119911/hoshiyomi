@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { stripe } from "@/lib/stripe";
+import { findCustomerByUserId, getActiveSubscription } from "@/lib/payjp";
 
 export async function GET() {
   const session = await auth();
@@ -9,22 +9,11 @@ export async function GET() {
   }
 
   try {
-    const customers = await stripe.customers.search({
-      query: `metadata['userId']:'${session.user.id}'`,
-      limit: 1,
-    });
+    const customer = await findCustomerByUserId(session.user.id);
+    if (!customer) return NextResponse.json({ isPremium: false });
 
-    if (customers.data.length === 0) {
-      return NextResponse.json({ isPremium: false });
-    }
-
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customers.data[0].id,
-      status: "active",
-      limit: 1,
-    });
-
-    return NextResponse.json({ isPremium: subscriptions.data.length > 0 });
+    const subscription = await getActiveSubscription(customer.id);
+    return NextResponse.json({ isPremium: !!subscription });
   } catch {
     return NextResponse.json({ isPremium: false });
   }

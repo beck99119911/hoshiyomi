@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const BLOOD_TYPES = ["A", "B", "O", "AB"];
 
@@ -39,7 +40,7 @@ const SCORE_LABELS = [
   { key: "future",  label: "将来性" },
 ];
 
-function ScoreRow({ label, score }: { label: string; score: number }) {
+function ScoreRow({ label, score, delay = "0s" }: { label: string; score: number; delay?: string }) {
   return (
     <div>
       <div className="flex justify-between text-xs mb-1.5">
@@ -50,12 +51,13 @@ function ScoreRow({ label, score }: { label: string; score: number }) {
       </div>
       <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(212,168,76,0.12)" }}>
         <div
-          className="h-full rounded-full"
+          className="bar-anim h-full rounded-full"
           style={{
             width: `${score * 20}%`,
             background: "linear-gradient(90deg, #d4a84c, #f0d898)",
             boxShadow: "0 0 6px rgba(212,168,76,0.35)",
-          }}
+            ["--delay" as string]: delay,
+          } as React.CSSProperties}
         />
       </div>
     </div>
@@ -127,6 +129,7 @@ function PersonForm({
 
 export default function CompatibilityPage() {
   const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
   const [isPremium, setIsPremium] = useState(false);
   const [premiumChecked, setPremiumChecked] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -152,16 +155,9 @@ export default function CompatibilityPage() {
       .catch(() => setPremiumChecked(true));
   }, [session, sessionStatus]);
 
-  async function handleUpgrade() {
+  function handleUpgrade() {
     if (!session?.user) return;
-    setCheckoutLoading(true);
-    try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {
-      setCheckoutLoading(false);
-    }
+    router.push("/subscribe");
   }
 
   const emptyPerson: PersonInput = { birthYear: "", birthMonth: "", birthDay: "", bloodType: "" };
@@ -202,6 +198,11 @@ export default function CompatibilityPage() {
   }
 
   return (
+    <>
+    <style>{`
+      @keyframes barFill { from { width: 0%; } }
+      .bar-anim { animation: barFill 1.2s ease forwards var(--delay, 0s); }
+    `}</style>
     <main className="relative z-10 min-h-screen text-[#f0e8d8] px-6 py-12">
       <div className="max-w-lg mx-auto">
 
@@ -249,8 +250,8 @@ export default function CompatibilityPage() {
 
             {/* スコア */}
             <div className="space-y-4 py-6" style={{ borderTop: "1px solid rgba(212,168,76,0.25)" }}>
-              {SCORE_LABELS.map(({ key, label }) => (
-                <ScoreRow key={key} label={label} score={result.scores[key as keyof typeof result.scores]} />
+              {SCORE_LABELS.map(({ key, label }, i) => (
+                <ScoreRow key={key} label={label} score={result.scores[key as keyof typeof result.scores]} delay={`${i * 0.12}s`} />
               ))}
             </div>
 
@@ -368,5 +369,6 @@ export default function CompatibilityPage() {
         )}
       </div>
     </main>
+    </>
   );
 }

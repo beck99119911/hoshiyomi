@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 type MouthState = "closed" | "half" | "open";
 
@@ -240,6 +241,7 @@ function PalmScanner({
 
 export default function FortunePage() {
   const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
   const [isPremium, setIsPremium] = useState(false);
   const [premiumChecked, setPremiumChecked] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -282,25 +284,21 @@ export default function FortunePage() {
       .catch(() => setPremiumChecked(true));
   }, [session, sessionStatus]);
 
-  async function handleUpgrade() {
-    if (!session?.user) return;
-    setCheckoutLoading(true);
-    try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {
-      setCheckoutLoading(false);
-    }
+  function handleUpgrade() {
+    router.push("/subscribe");
   }
 
   async function handlePortal() {
+    if (!confirm("プレミアムプランを解約しますか？")) return;
     setCheckoutLoading(true);
     try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {
+      const res = await fetch("/api/payjp/cancel", { method: "POST" });
+      if (res.ok) {
+        const uid = session?.user?.id;
+        if (uid) localStorage.removeItem(`premium_${uid}`);
+        setIsPremium(false);
+      }
+    } finally {
       setCheckoutLoading(false);
     }
   }
@@ -623,6 +621,19 @@ export default function FortunePage() {
                 </p>
               </div>
 
+              {/* 相性診断バナー */}
+              <Link
+                href="/compatibility"
+                className="flex items-center justify-between w-full px-5 py-4 transition-all hover:opacity-80"
+                style={{ background: "rgba(212,168,76,0.05)", border: "1px solid rgba(212,168,76,0.2)" }}
+              >
+                <div>
+                  <p className="text-xs tracking-[0.2em] text-[#d4a84c]/70 uppercase mb-0.5">Compatibility</p>
+                  <p className="text-sm text-[#f0e8d8]/70">気になる相手との相性を診断する</p>
+                </div>
+                <span className="text-[#d4a84c]/50 text-lg">→</span>
+              </Link>
+
               {/* シェア */}
               <div className="space-y-3">
                 <div className="text-center space-y-1">
@@ -762,19 +773,6 @@ export default function FortunePage() {
                   </div>
                 )}
               </div>
-
-              {/* 相性診断バナー */}
-              <Link
-                href="/compatibility"
-                className="flex items-center justify-between w-full px-5 py-4 transition-all hover:opacity-80"
-                style={{ background: "rgba(212,168,76,0.05)", border: "1px solid rgba(212,168,76,0.2)" }}
-              >
-                <div>
-                  <p className="text-xs tracking-[0.2em] text-[#d4a84c]/70 uppercase mb-0.5">Compatibility</p>
-                  <p className="text-sm text-[#f0e8d8]/70">気になる相手との相性を診断する</p>
-                </div>
-                <span className="text-[#d4a84c]/50 text-lg">→</span>
-              </Link>
 
               <button
                 onClick={() => { setResult(null); setPalmResult(null); setPalmImage(null); }}
