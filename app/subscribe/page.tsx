@@ -80,10 +80,17 @@ export default function SubscribePage() {
         return;
       }
 
+      const tokenId = (result as unknown as { id: string }).id ?? result.token?.id;
+      if (!tokenId) {
+        setError("カードのトークン取得に失敗しました");
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("/api/payjp/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: result.token!.id }),
+        body: JSON.stringify({ token: tokenId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
