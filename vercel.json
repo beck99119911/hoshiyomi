@@ -1,8 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/post-horoscope",
-      "schedule": "23 21 * * *"
-    }
-  ]
+  "crons": []
 }

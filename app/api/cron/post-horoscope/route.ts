@@ -30,21 +30,16 @@ export async function GET(req: Request) {
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const now = new Date();
-  const jstDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
   const today = now.toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo", month: "long", day: "numeric", weekday: "long" });
   const theme = THEMES[now.getDay()];
 
-  // URLに日付パラメータを付けてbot判定を回避
-  const dateParam = `${jstDate.getFullYear()}${String(jstDate.getMonth() + 1).padStart(2, "0")}${String(jstDate.getDate()).padStart(2, "0")}`;
-  const siteUrl = `hoshiyomi.xyz/?d=${dateParam}`;
-
-  // 誘導文をランダム化
+  // プロフィール誘導文をランダム化（URLなし）
   const CTA_TEMPLATES = [
-    `あなただけの鑑定は → ${siteUrl}`,
-    `詳しい鑑定はこちら👇 ${siteUrl}`,
-    `AIで個別鑑定 → ${siteUrl}`,
-    `あなたの運勢を診る → ${siteUrl}`,
-    `今日の詳細はこちら → ${siteUrl}`,
+    "あなただけの鑑定はプロフィールから",
+    "詳しい鑑定はプロフィールリンクから",
+    "AIで個別鑑定 → プロフィールへ",
+    "あなたの運勢を診る → プロフィールから",
+    "今日の詳細はプロフィールリンクへ",
   ];
   const cta = CTA_TEMPLATES[Math.floor(Math.random() * CTA_TEMPLATES.length)];
 
@@ -64,6 +59,7 @@ export async function GET(req: Request) {
 ・最後の行は必ずこの一文をそのまま使う：「${cta}」
 ・ハッシュタグは「#今日の運勢 #星詠み #占い」の3つのみ
 ・絵文字を1〜2個
+・URLは絶対に含めない
 ・本文のみ出力（前置き不要）`,
     }],
   });
