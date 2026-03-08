@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AuthButton from "@/components/AuthButton";
+import BirthdaySearch from "@/components/BirthdaySearch";
 
 export default function Home() {
   return (
@@ -207,6 +208,35 @@ export default function Home() {
             <span className="gold-text font-bold">鑑定を始める</span>
             <span className="text-[#c9a84c] group-hover:translate-x-1 transition-transform">→</span>
           </Link>
+        </div>
+
+        {/* ── 誕生日占い ── */}
+        <div className="mt-24">
+          <div className="divider mb-14">Birthday Reading</div>
+          <div className="text-center space-y-4 mb-10">
+            <p className="text-sm text-[#f5eedd]/60 leading-relaxed">
+              365日すべての誕生日の運命・性格・2026年の運勢を掲載。
+            </p>
+          </div>
+          <BirthdaySearch />
+          <div className="mt-6 text-center">
+            <p className="text-[10px] text-[#f0e8d8]/25 tracking-wider">例：</p>
+            <div className="flex flex-wrap justify-center gap-3 mt-2">
+              {["0101","0214","0308","0623","1111","1225"].map((mmdd) => {
+                const m = parseInt(mmdd.slice(0,2));
+                const d = parseInt(mmdd.slice(2,4));
+                return (
+                  <Link
+                    key={mmdd}
+                    href={`/birthday/${mmdd}`}
+                    className="text-[11px] text-[#d4a84c]/50 hover:text-[#d4a84c] transition-colors tracking-wider"
+                  >
+                    {m}/{d}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* フッター */}
