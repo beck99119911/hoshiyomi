@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  verification: { google: "YK2Ts3m6sfBL9UkJoFMSz4iS77CZua4iGi4HPeJvbjM" },
   title: "星詠み - AIによる本格占い鑑定",
   description: "西洋占星術・数秘術・血液型を組み合わせたAI占い。今の悩みを入力するだけで、具体的なアドバイスが届きます。1日3回まで無料。",
   metadataBase: new URL("https://hoshiyomi.xyz"),
