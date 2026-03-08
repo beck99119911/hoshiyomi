@@ -1,6 +1,22 @@
 import Link from "next/link";
 import AuthButton from "@/components/AuthButton";
 import BirthdaySearch from "@/components/BirthdaySearch";
+import MatchSelector from "@/components/MatchSelector";
+
+const ZODIACS = [
+  { slug: "aries",       name: "牡羊座", symbol: "♈" },
+  { slug: "taurus",      name: "牡牛座", symbol: "♉" },
+  { slug: "gemini",      name: "双子座", symbol: "♊" },
+  { slug: "cancer",      name: "蟹座",   symbol: "♋" },
+  { slug: "leo",         name: "獅子座", symbol: "♌" },
+  { slug: "virgo",       name: "乙女座", symbol: "♍" },
+  { slug: "libra",       name: "天秤座", symbol: "♎" },
+  { slug: "scorpio",     name: "蠍座",   symbol: "♏" },
+  { slug: "sagittarius", name: "射手座", symbol: "♐" },
+  { slug: "capricorn",   name: "山羊座", symbol: "♑" },
+  { slug: "aquarius",    name: "水瓶座", symbol: "♒" },
+  { slug: "pisces",      name: "魚座",   symbol: "♓" },
+];
 
 export default function Home() {
   return (
@@ -240,6 +256,45 @@ export default function Home() {
               </div>
             );
           })()}
+        </div>
+
+        {/* ── 星座占い ── */}
+        <div className="mt-24">
+          <div className="divider mb-14">Zodiac Reading</div>
+          <div className="text-center space-y-4 mb-8">
+            <p className="text-sm text-[#f5eedd]/60 leading-relaxed">
+              12星座それぞれの性格・恋愛・仕事・2026年運勢を詳しく解説。
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {ZODIACS.map((z) => (
+              <Link
+                key={z.slug}
+                href={`/zodiac/${z.slug}`}
+                className="py-4 text-center transition-all duration-200 hover:opacity-80"
+                style={{
+                  background: "rgba(212,168,76,0.04)",
+                  border: "1px solid rgba(212,168,76,0.12)",
+                  color: "#f5eedd99",
+                }}
+              >
+                <div className="text-xl leading-none gold-text">{z.symbol}</div>
+                <div className="text-[9px] tracking-wide mt-1.5">{z.name}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ── 相性占い ── */}
+        <div className="mt-24">
+          <div className="divider mb-14">Compatibility</div>
+          <div className="text-center space-y-4 mb-8">
+            <p className="text-sm text-[#f5eedd]/60 leading-relaxed">
+              144通りの星座相性をスコアで表示。<br />
+              相手との恋愛・友情・仕事の相性を確認できます。
+            </p>
+          </div>
+          <MatchSelector />
         </div>
 
         {/* フッター */}
