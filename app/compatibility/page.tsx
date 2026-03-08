@@ -6,6 +6,27 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 const BLOOD_TYPES = ["A", "B", "O", "AB"];
+const MAX_DAILY = 3;
+const STORAGE_KEY = "uranai_count";
+
+function getDailyData(): { count: number; bonus: number } {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return { count: 0, bonus: 0 };
+    const { date, count, bonus = 0 } = JSON.parse(stored);
+    if (date !== new Date().toDateString()) return { count: 0, bonus: 0 };
+    return { count, bonus };
+  } catch {
+    return { count: 0, bonus: 0 };
+  }
+}
+
+function getDailyCount(): number { return getDailyData().count; }
+function getMaxDaily(): number { return MAX_DAILY + getDailyData().bonus; }
+function incrementDailyCount() {
+  const { count, bonus } = getDailyData();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: new Date().toDateString(), count: count + 1, bonus }));
+}
 
 function getDates(start: number, end: number, label: string) {
   return Array.from({ length: end - start + 1 }, (_, i) => ({
@@ -173,6 +194,16 @@ export default function CompatibilityPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (!isPremium) {
+      const count = getDailyCount();
+      const max = getMaxDaily();
+      if (count >= max) {
+        setError(`本日の鑑定（${max}回）に達しました。プレミアムプランで無制限に鑑定できます。`);
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const toBirthDate = (p: PersonInput) =>
@@ -188,6 +219,7 @@ export default function CompatibilityPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      if (!isPremium) incrementDailyCount();
       setResult(data);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
