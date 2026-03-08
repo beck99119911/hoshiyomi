@@ -31,5 +31,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  return [...staticPages, ...birthdayPages];
+  const ZODIACS = [
+    "aries", "taurus", "gemini", "cancer", "leo", "virgo",
+    "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
+  ];
+
+  const zodiacPages: MetadataRoute.Sitemap = ZODIACS
+    .filter((slug) => existsSync(join(process.cwd(), "data/zodiac", `${slug}.json`)))
+    .map((slug) => ({
+      url: `${base}/zodiac/${slug}`,
+      lastModified: new Date("2026-03-08"),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+
+  const matchPages: MetadataRoute.Sitemap = [];
+  for (const s1 of ZODIACS) {
+    for (const s2 of ZODIACS) {
+      const pair = `${s1}-${s2}`;
+      if (existsSync(join(process.cwd(), "data/match", `${pair}.json`))) {
+        matchPages.push({
+          url: `${base}/match/${pair}`,
+          lastModified: new Date("2026-03-08"),
+          changeFrequency: "yearly" as const,
+          priority: 0.6,
+        });
+      }
+    }
+  }
+
+  return [...staticPages, ...birthdayPages, ...zodiacPages, ...matchPages];
 }
