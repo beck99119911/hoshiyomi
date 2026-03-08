@@ -154,6 +154,11 @@ export default function CompatibilityPage() {
   const [isPremium, setIsPremium] = useState(false);
   const [premiumChecked, setPremiumChecked] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [remainingCount, setRemainingCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    setRemainingCount(getMaxDaily() - getDailyCount());
+  }, []);
 
   useEffect(() => {
     if (sessionStatus === "loading") return;
@@ -219,7 +224,10 @@ export default function CompatibilityPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      if (!isPremium) incrementDailyCount();
+      if (!isPremium) {
+        incrementDailyCount();
+        setRemainingCount(getMaxDaily() - getDailyCount());
+      }
       setResult(data);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -365,6 +373,11 @@ export default function CompatibilityPage() {
               <p className="text-xs text-[#f0e8d8]/30 tracking-wider mt-2">
                 星座 · 数秘術 · 血液型で二人の縁を読む
               </p>
+              {!isPremium && remainingCount !== null && (
+                <p className="text-xs tracking-wider mt-1" style={{ color: remainingCount > 0 ? "rgba(212,168,76,0.5)" : "rgba(240,100,100,0.6)" }}>
+                  {remainingCount > 0 ? `本日あと${remainingCount}回` : "本日の残り回数なし · プレミアムで無制限"}
+                </p>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">

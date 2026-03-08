@@ -245,6 +245,11 @@ export default function FortunePage() {
   const [isPremium, setIsPremium] = useState(false);
   const [premiumChecked, setPremiumChecked] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [remainingCount, setRemainingCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    setRemainingCount(getMaxDaily() - getDailyCount());
+  }, []);
 
   useEffect(() => {
     if (sessionStatus === "loading") return;
@@ -431,6 +436,7 @@ export default function FortunePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       incrementDailyCount();
+      setRemainingCount(getMaxDaily() - getDailyCount());
       setPalmResult(data);
     } catch (err) {
       setPalmError(err instanceof Error ? err.message : "エラーが発生しました");
@@ -462,6 +468,7 @@ export default function FortunePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       incrementDailyCount();
+      setRemainingCount(getMaxDaily() - getDailyCount());
       setResult(data);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -803,7 +810,13 @@ export default function FortunePage() {
                   <span className="gold-text">{isPremium ? "プレミアム鑑定" : "無料鑑定"}</span>
                 </h1>
                 <p className="text-xs text-[#f0e8d8]/30 tracking-wider mt-2">
-                  {isPremium ? "無制限 · プレミアム会員" : "1日3回まで · 登録不要"}
+                  {isPremium
+                    ? "無制限 · プレミアム会員"
+                    : remainingCount !== null
+                      ? remainingCount > 0
+                        ? `本日あと${remainingCount}回 · 登録不要`
+                        : "本日の残り回数なし · プレミアムで無制限"
+                      : "1日3回まで · 登録不要"}
                 </p>
               </div>
 
