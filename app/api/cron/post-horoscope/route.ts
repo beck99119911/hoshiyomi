@@ -30,8 +30,23 @@ export async function GET(req: Request) {
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const now = new Date();
+  const jstDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
   const today = now.toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo", month: "long", day: "numeric", weekday: "long" });
   const theme = THEMES[now.getDay()];
+
+  // URLに日付パラメータを付けてbot判定を回避
+  const dateParam = `${jstDate.getFullYear()}${String(jstDate.getMonth() + 1).padStart(2, "0")}${String(jstDate.getDate()).padStart(2, "0")}`;
+  const siteUrl = `hoshiyomi.xyz/?d=${dateParam}`;
+
+  // 誘導文をランダム化
+  const CTA_TEMPLATES = [
+    `あなただけの鑑定は → ${siteUrl}`,
+    `詳しい鑑定はこちら👇 ${siteUrl}`,
+    `AIで個別鑑定 → ${siteUrl}`,
+    `あなたの運勢を診る → ${siteUrl}`,
+    `今日の詳細はこちら → ${siteUrl}`,
+  ];
+  const cta = CTA_TEMPLATES[Math.floor(Math.random() * CTA_TEMPLATES.length)];
 
   const res = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
@@ -46,7 +61,7 @@ export async function GET(req: Request) {
 ・全星座共通の内容（特定の星座名を出さない）
 ・詩的で温かみがあり、読んだ人が少し前向きになれる文章
 ・2〜4行の短い本文
-・最後の行にURLへの自然な誘導を1行（「あなただけの鑑定は → hoshiyomi.xyz」など）
+・最後の行は必ずこの一文をそのまま使う：「${cta}」
 ・ハッシュタグは「#今日の運勢 #星詠み #占い」の3つのみ
 ・絵文字を1〜2個
 ・本文のみ出力（前置き不要）`,
