@@ -169,59 +169,22 @@ export default function SubscribePage() {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* PAY.JP カード入力エリア */}
-          <div>
-            <p className="text-[10px] tracking-[0.3em] text-[#d4a84c]/60 uppercase mb-3">Card Info</p>
-            <div
-              id="card-element"
-              className="p-4"
-              style={{ border: "1px solid rgba(212,168,76,0.3)", background: "rgba(212,168,76,0.03)", minHeight: "48px" }}
-            />
-            {!scriptLoaded && (
-              <p className="text-xs text-[#f5eedd]/30 mt-2 text-center">読み込み中...</p>
-            )}
-          </div>
-
-          {error && (
-            <p className="text-xs text-red-400/80 text-center tracking-wider">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !scriptLoaded}
-            className="w-full py-4 text-sm tracking-[0.3em] uppercase transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{
-              background: loading
-                ? "rgba(212,168,76,0.08)"
-                : "linear-gradient(135deg, rgba(212,168,76,0.18), rgba(212,168,76,0.08))",
-              border: "1px solid rgba(212,168,76,0.5)",
-              color: "#e8d08a",
-            }}
-          >
-            {loading ? <span className="shimmer inline-block">処理中 ...</span> : "¥980/月で登録する →"}
-          </button>
-
-          {/* PAY.JP セキュリティバッジ */}
-          <div
-            className="flex items-center justify-center gap-3 py-3 px-4"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <span className="text-[#f0e8d8]/40 text-lg">🔒</span>
-            <div className="text-center">
-              <p className="text-[10px] text-[#f0e8d8]/50 tracking-wider">
-                決済は <a href="https://pay.jp" target="_blank" rel="noopener noreferrer" className="underline text-[#f0e8d8]/70 hover:text-[#f0e8d8]">PAY.JP</a> が安全に処理します
-              </p>
-              <p className="text-[9px] text-[#f0e8d8]/25 tracking-wider mt-0.5">
-                カード情報は当サイトのサーバーには送信されません
-              </p>
-            </div>
-          </div>
-
-          <p className="text-center text-[10px] text-[#f0e8d8]/20 tracking-wider leading-relaxed">
-            毎月自動更新。マイページよりいつでも解約できます。
+        {/* 決済準備中 */}
+        <div
+          className="py-10 text-center space-y-4"
+          style={{ border: "1px solid rgba(212,168,76,0.2)", background: "rgba(212,168,76,0.03)" }}
+        >
+          <p className="text-2xl">🔧</p>
+          <p className="text-sm tracking-widest text-[#d4a84c]/80">決済機能 準備中</p>
+          <p className="text-xs text-[#f0e8d8]/40 leading-relaxed">
+            現在、決済システムの導入手続きを進めています。<br />
+            準備が整い次第、ご利用いただけます。
           </p>
-        </form>
+        </div>
+
+        <p className="text-center text-[10px] text-[#f0e8d8]/20 tracking-wider leading-relaxed mt-6">
+          もうしばらくお待ちください。
+        </p>
       </div>
     </main>
   );
