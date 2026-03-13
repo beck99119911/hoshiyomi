@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 const ROWS = [
-  { label: "販売業者", value: "請求があった場合、遅滞なく開示します。" },
-  { label: "代表者名", value: "請求があった場合、遅滞なく開示します。" },
-  { label: "所在地", value: "請求があった場合、遅滞なく開示します。" },
-  { label: "電話番号", value: "請求があった場合、遅滞なく開示します。" },
+  { label: "販売業者", value: "茂木正之" },
+  { label: "代表者名", value: "茂木正之" },
+  { label: "所在地", value: "千葉県松戸市新松戸" },
+  { label: "電話番号", value: "090-4435-5595" },
   { label: "メールアドレス", value: "homenote.net@gmail.com" },
   { label: "サービス名", value: "星詠み（hoshiyomi.xyz）" },
   { label: "販売価格", value: "プレミアムプラン ¥980 / 月（税込）" },
