@@ -285,6 +285,7 @@ export default function Home() {
           <Link href="/terms" className="hover:text-[#d4a84c]/60 transition-colors">利用規約</Link>
           <Link href="/privacy" className="hover:text-[#d4a84c]/60 transition-colors">プライバシーポリシー</Link>
           <Link href="/tokusho" className="hover:text-[#d4a84c]/60 transition-colors">特定商取引法</Link>
+          <a href="mailto:beck99119911@outlook.jp" className="hover:text-[#d4a84c]/60 transition-colors">お問い合わせ</a>
         </footer>
       </section>
     </main>
