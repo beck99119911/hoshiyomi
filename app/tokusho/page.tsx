@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 const ROWS = [
-  { label: "販売業者", value: "Beck Works" },
-  { label: "代表者名", value: "請求があった場合、遅滞なく開示します。" },
+  { label: "販売業者", value: "茂木正之" },
+  { label: "代表者名", value: "茂木正之" },
   { label: "所在地", value: "千葉県松戸市新松戸3-209 ラフィーヌ高橋102" },
   { label: "電話番号", value: "090-4435-5595" },
   { label: "メールアドレス", value: "homenote.net@gmail.com" },
