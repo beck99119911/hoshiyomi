@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import type { OAuthConfig } from "next-auth/providers";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
 
 interface LINEProfile {
   userId: string;
@@ -33,6 +35,7 @@ const LINE: OAuthConfig<LINEProfile> = {
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
@@ -41,8 +44,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     LINE,
   ],
   callbacks: {
-    session({ session, token }) {
-      if (token.sub) session.user.id = token.sub;
+    session({ session, user }) {
+      session.user.id = user.id;
       return session;
     },
   },
