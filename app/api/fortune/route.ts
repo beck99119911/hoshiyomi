@@ -51,12 +51,32 @@ function getWeekRange(): { start: string; end: string } {
   return { start: fmt(monday), end: fmt(sunday) };
 }
 
+const CRISIS_KEYWORDS = [
+  "死にたい", "死ぬ", "自殺", "消えたい", "消えてしまいたい",
+  "生きていたくない", "もう終わりにしたい",
+];
+
+function containsCrisisKeyword(text: string): boolean {
+  return CRISIS_KEYWORDS.some((kw) => text.includes(kw));
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { birthDate, bloodType, concern } = await req.json();
 
     if (!birthDate || !bloodType || !concern) {
       return NextResponse.json({ error: "入力が不足しています" }, { status: 400 });
+    }
+
+    if (containsCrisisKeyword(concern)) {
+      return NextResponse.json(
+        {
+          error:
+            "この内容は占いではお答えできません。今つらい気持ちがあるなら、よりそいホットライン（0120-279-338）に話しかけてみてください。24時間つながれます。",
+          isCrisis: true,
+        },
+        { status: 400 }
+      );
     }
 
     const zodiac = getZodiacSign(birthDate);
