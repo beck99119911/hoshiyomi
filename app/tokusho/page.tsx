@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: "noindex, nofollow",
+};
 
 const ROWS = [
   { label: "販売業者", value: "masayuki" },
