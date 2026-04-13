@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const ROWS = [
-  { label: "販売業者", value: "茂木正之" },
-  { label: "代表者名", value: "茂木正之" },
-  { label: "所在地", value: "千葉県松戸市新松戸3-209 ラフィーヌ高橋102" },
+  { label: "販売業者", value: "masayuki" },
+  { label: "代表者名", value: "masayuki" },
+  { label: "所在地", value: "Chiba Matsudo" },
   { label: "電話番号", value: "090-4435-5595" },
   { label: "メールアドレス", value: "homenote.net@gmail.com" },
   { label: "サービス名", value: "星詠み（hoshiyomi.xyz）" },
