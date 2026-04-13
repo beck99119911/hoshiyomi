@@ -7,7 +7,7 @@ const ROWS = [
   { label: "メールアドレス", value: "beck99119911@outlook.jp" },
   { label: "サービス名", value: "星詠み（hoshiyomi.xyz）" },
   { label: "販売価格", value: "プレミアムプラン ¥980 / 月（税込）" },
-  { label: "お支払い方法", value: "クレジットカード（Visa・Mastercard・American Express・JCB）" },
+  { label: "お支払い方法", value: "クレジットカード（Visa・Mastercard）" },
   { label: "お支払い時期", value: "ご購入時に即時決済" },
   { label: "サービス提供時期", value: "決済完了後、即時ご利用いただけます。" },
   {
