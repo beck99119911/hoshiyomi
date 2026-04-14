@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { findCustomerByUserId, getActiveSubscription } from "@/lib/payjp";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   const session = await auth();
@@ -8,13 +8,10 @@ export async function GET() {
     return NextResponse.json({ isPremium: false });
   }
 
-  try {
-    const customer = await findCustomerByUserId(session.user.id);
-    if (!customer) return NextResponse.json({ isPremium: false });
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { isPremium: true },
+  });
 
-    const subscription = await getActiveSubscription(customer.id);
-    return NextResponse.json({ isPremium: !!subscription });
-  } catch {
-    return NextResponse.json({ isPremium: false });
-  }
+  return NextResponse.json({ isPremium: user?.isPremium ?? false });
 }
