@@ -16,9 +16,11 @@ export async function POST() {
     cancelUrl: `${baseUrl}/fortune`,
   });
 
-  if (!data.session_url) {
-    return NextResponse.json({ error: "決済セッションの作成に失敗しました" }, { status: 500 });
+  const url = data.session_url ?? data.url;
+  if (!url) {
+    console.error("KOMOJU checkout error:", JSON.stringify(data));
+    return NextResponse.json({ error: "決済セッションの作成に失敗しました", detail: data }, { status: 500 });
   }
 
-  return NextResponse.json({ url: data.session_url });
+  return NextResponse.json({ url });
 }

@@ -2,19 +2,26 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSession, signIn } from "next-auth/react";
 
 export default function SubscribePage() {
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubscribe() {
+    if (!session?.user) {
+      signIn();
+      return;
+    }
     setLoading(true);
     setError("");
     try {
       const res = await fetch("/api/komoju/checkout", { method: "POST" });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      const url = data.session_url ?? data.url;
+      if (url) {
+        window.location.href = url;
       } else {
         setError("決済ページの取得に失敗しました。再度お試しください。");
       }
@@ -24,6 +31,8 @@ export default function SubscribePage() {
       setLoading(false);
     }
   }
+
+  if (status === "loading") return null;
 
   return (
     <main className="relative z-10 min-h-screen text-[#f0e8d8] px-6 py-12">
