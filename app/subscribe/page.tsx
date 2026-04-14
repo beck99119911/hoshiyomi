@@ -1,6 +1,30 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 export default function SubscribePage() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubscribe() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/komoju/checkout", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError("決済ページの取得に失敗しました。再度お試しください。");
+      }
+    } catch {
+      setError("エラーが発生しました。再度お試しください。");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main className="relative z-10 min-h-screen text-[#f0e8d8] px-6 py-12">
       <div className="max-w-md mx-auto">
@@ -38,21 +62,23 @@ export default function SubscribePage() {
           ))}
         </div>
 
-        {/* 決済準備中 */}
-        <div
-          className="py-10 text-center space-y-4"
-          style={{ border: "1px solid rgba(212,168,76,0.2)", background: "rgba(212,168,76,0.03)" }}
+        {/* 決済ボタン */}
+        <button
+          onClick={handleSubscribe}
+          disabled={loading}
+          className="w-full py-4 text-sm tracking-[0.2em] font-medium transition-opacity disabled:opacity-50"
+          style={{ background: "linear-gradient(135deg, #d4a84c, #b8863a)", color: "#1a1025" }}
         >
-          <p className="text-2xl">🔧</p>
-          <p className="text-sm tracking-widest text-[#d4a84c]/80">決済機能 準備中</p>
-          <p className="text-xs text-[#f0e8d8]/40 leading-relaxed">
-            現在、決済システムの導入手続きを進めています。<br />
-            準備が整い次第、ご利用いただけます。
-          </p>
-        </div>
+          {loading ? "処理中..." : "プレミアムに登録する"}
+        </button>
+
+        {error && (
+          <p className="text-center text-xs text-red-400 mt-4">{error}</p>
+        )}
 
         <p className="text-center text-[10px] text-[#f0e8d8]/20 tracking-wider leading-relaxed mt-6">
-          もうしばらくお待ちください。
+          Visa・Mastercard に対応しています。<br />
+          解約はいつでもメールにてご連絡ください。
         </p>
       </div>
     </main>
