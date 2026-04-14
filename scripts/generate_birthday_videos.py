@@ -87,7 +87,7 @@ def get_zodiac(m, d):
 def capture_screenshots(month, day):
     """capture-birthday.mjs を実行してSS取得"""
     result = subprocess.run(
-        ["node", "../scripts/capture-birthday.mjs", str(month), str(day)],
+        ["/home/user/.nvm/versions/node/v25.7.0/bin/node", "../scripts/capture-birthday.mjs", str(month), str(day)],
         cwd=f"{SCHEDULED_DIR}",
         capture_output=True,
         text=True,
