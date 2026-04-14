@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
   const event = JSON.parse(body);
 
   // 決済完了: isPremiumをtrueに
-  if (event.type === "payment.captured" || event.type === "subscription.created") {
+  const capturedEvents = ["payment.captured", "subscription.created", "subscription.captured"];
+  if (capturedEvents.includes(event.type)) {
     const userId = event.data?.metadata?.userId;
     const customerId = event.data?.customer_id ?? null;
     if (userId) {
@@ -30,8 +31,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // サブスクリプション解約: isPremiumをfalseに
-  if (event.type === "subscription.cancelled" || event.type === "subscription.expired") {
+  // サブスクリプション停止・削除: isPremiumをfalseに
+  const cancelledEvents = ["subscription.suspended", "subscription.deleted"];
+  if (cancelledEvents.includes(event.type)) {
     const userId = event.data?.metadata?.userId;
     if (userId) {
       await prisma.user.update({
