@@ -29,8 +29,8 @@ SCHEDULED_DIR = "/home/user/uranai-app/scheduled"
 VIDEO_TOOL_OUTPUT = "/home/user/video_tool/output/local"
 API_BASE = "http://localhost:8080"
 
-TELEGRAM_BOT_TOKEN = "8631104030:AAGVQqHjXVbXcJOa2j5G4fHfH5IjOckLj7c"
-TELEGRAM_CHAT_ID   = "7066974028"
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 
 def notify_telegram(msg: str) -> None:

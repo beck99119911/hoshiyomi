@@ -37,8 +37,8 @@ SCRIPT_DIR    = Path(__file__).parent
 SCHEDULED_DIR = SCRIPT_DIR.parent / "scheduled"
 
 
-TELEGRAM_BOT_TOKEN = "8631104030:AAGVQqHjXVbXcJOa2j5G4fHfH5IjOckLj7c"
-TELEGRAM_CHAT_ID   = "7066974028"
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 
 def notify_telegram(msg: str) -> None:
