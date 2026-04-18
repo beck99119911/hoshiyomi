@@ -167,24 +167,13 @@ function HeroSection() {
 
         {/* Social proof */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', borderTop: `0.5px solid ${GOLD}33`, borderBottom: `0.5px solid ${GOLD}33` }}>
-          <div style={{ display: 'flex' }}>
-            {['#3a2a5a','#5a3a8a','#8a5a3a','#c8944a'].map((c, i) => (
-              <div key={i} style={{ width: 24, height: 24, borderRadius: '50%', background: c, border: '1.5px solid #050814', marginLeft: i > 0 ? -8 : 0, boxShadow: i === 3 ? `0 0 8px ${GOLD}88` : 'none' }} />
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 20 }}>
+            {['完全無料', '登録不要', '3分で完了'].map((label) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: INK_MUTED, letterSpacing: '0.1em' }}>
+                <span style={{ color: GOLD_BRIGHT }}>✓</span>
+                <span>{label}</span>
+              </div>
             ))}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 500, color: GOLD_BRIGHT, letterSpacing: '0.02em' }}>128,400</span>
-              <span style={{ fontSize: 10, color: INK_MUTED, letterSpacing: '0.2em' }}>人が鑑定済み</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-              {[0,1,2,3,4].map(i => (
-                <svg key={i} width="9" height="9" viewBox="0 0 24 24">
-                  <path d="M12 1 L14.5 9 L22 9.5 L16 14.5 L18 22 L12 17.5 L6 22 L8 14.5 L2 9.5 L9.5 9 Z" fill={GOLD_BRIGHT}/>
-                </svg>
-              ))}
-              <span style={{ fontSize: 10, color: INK_MUTED, marginLeft: 4 }}>4.89 · 32,201件のレビュー</span>
-            </div>
           </div>
         </div>
 
@@ -347,7 +336,7 @@ function FinalCTASection() {
           <span style={{ opacity: 0.4 }}>·</span>
           <span>✓ 登録不要</span>
           <span style={{ opacity: 0.4 }}>·</span>
-          <span>✓ PDF受取可</span>
+          <span>✓ 3分で完了</span>
         </div>
       </div>
     </section>

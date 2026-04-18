@@ -121,8 +121,8 @@ export default function SampleReadingToggle() {
         {!flipped ? <BeforeCard /> : <AfterCard />}
 
         <div style={{ marginTop: 20, padding: 14, border: `0.5px dashed ${GOLD}44`, textAlign: 'center', fontFamily: "'Noto Serif JP', serif", fontSize: 11, lineHeight: 1.8, color: INK_SOFT, letterSpacing: '0.08em' }}>
-          <span style={{ color: GOLD_BRIGHT, fontWeight: 600 }}>※ 全文は鑑定後にお届けします。</span><br />
-          <span style={{ color: INK_MUTED, fontSize: 10 }}>PDF形式 · 約4,200文字 · 無料</span>
+          <span style={{ color: GOLD_BRIGHT, fontWeight: 600 }}>※ 実際の鑑定結果はさらに詳しくお伝えします。</span><br />
+          <span style={{ color: INK_MUTED, fontSize: 10 }}>無料 · 登録不要 · 3分で完了</span>
         </div>
       </div>
     </section>
