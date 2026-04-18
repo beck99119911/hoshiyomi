@@ -77,6 +77,18 @@ body {
   to   { width: var(--bar-width, 0%); }
 }
 
+@keyframes scrollDot {
+  0% { top: 0; opacity: 1; }
+  80% { top: 32px; opacity: 0.4; }
+  100% { top: 36px; opacity: 0; }
+}
+
+@keyframes shimmerBtn {
+  0% { left: -30%; }
+  60% { left: 130%; }
+  100% { left: 130%; }
+}
+
 .float { animation: float 5s ease-in-out infinite; }
 .shimmer { animation: shimmer 3s ease-in-out infinite; }
 .star-t { animation: twinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s); }
