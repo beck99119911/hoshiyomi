@@ -2,7 +2,7 @@ import Link from "next/link";
 import { fetchTodayBirthday, fetchLatestRankings, YTVideo } from "@/lib/youtube";
 import type { Metadata } from "next";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: "星詠み - 占い動画",
