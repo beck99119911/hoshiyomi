@@ -12,6 +12,7 @@ YouTube誕生日動画 週次予約投稿スクリプト（毎週日曜 03:00 JS
   python3 upload_youtube_weekly.py 2026-04-07  # 月曜日を指定
 """
 
+import os
 import re
 import sys
 from datetime import date, datetime, timedelta, timezone
@@ -36,6 +37,23 @@ def notify_telegram(msg: str) -> None:
         urllib.request.urlopen(url, timeout=10)
     except Exception as e:
         print(f"Telegram通知失敗: {e}")
+
+
+def revalidate_videos() -> None:
+    secret = os.environ.get("REVALIDATE_SECRET", "")
+    if not secret:
+        return
+    try:
+        req = urllib.request.Request(
+            "https://hoshiyomi.xyz/api/revalidate-videos",
+            method="POST",
+            headers={"x-revalidate-secret": secret, "Content-Length": "0"},
+        )
+        urllib.request.urlopen(req, timeout=10)
+    except Exception as e:
+        print(f"revalidate失敗: {e}")
+
+
 JST = timezone(timedelta(hours=9))
 
 
@@ -163,6 +181,8 @@ def main():
         log(f"  {date_str}: [{status}] {info}")
     ok = sum(1 for _, s, _ in results if s == "OK")
     log(f"\n合計: {ok}/7件成功")
+    if ok > 0:
+        revalidate_videos()
     notify_telegram(
         f"▶ YouTube誕生日動画 予約投稿完了\n"
         f"対象週: {monday} 〜 {sunday}\n"
